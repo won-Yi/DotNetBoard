@@ -1,4 +1,5 @@
-﻿@model Board.Models.Notice
+﻿@model Board.Controllers.NoticeDto
+
 
 @{
     ViewData["Title"] = "Details";
@@ -6,7 +7,7 @@
 
 <h1>Details</h1>
 
-<div>
+@*<div>
     <h4>Notice</h4>
     <hr />
     <dl class="row">
@@ -35,6 +36,77 @@
             @Html.DisplayFor(model => model.UpdateDate)
         </dd>
     </dl>
+    <div>*@
+
+<div>
+    <h4>Notice</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(@Model => @Model.Title)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(@Model => @Model.Title)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(@Model => @Model.Content)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(@Model => @Model.Content)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(@Model => @Model.UserName)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(@Model => @Model.UserName)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(@Model => @Model.UpdateDate)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(@Model => @Model.UpdateDate)
+        </dd>
+        
+    </dl>
+    <hr />
+  
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    댓글내용
+                </th>
+                <th>
+                    이름
+                </th>
+                <th>
+                    수정/삭제
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Comments)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Comment)
+                    </td>
+                    <div>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.UserName)
+                    </td>
+                    <td>
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a>
+                        </div>
+                        <div>
+                            <a asp-action="Delete" asp-route-id="@Model?.Id">Delete</a>
+                        </div>
+                    </td>
+                    </div>
+                </tr>
+            }
+    </table>
     <div>
         <div>
             <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.Id">Edit</a>
@@ -45,15 +117,16 @@
        
     </div>
 
+   
+    
 
     <div>
-        <h4>@ViewBag.username</h4>
-        <h4>@ViewBag.comment</h4>
+       
     </div>
 
     <form asp-action="CommentCreate" method="post">
         username:  <input type="text" name="username" /> <br />
-        Comment: <textarea name="comment" ></textarea>></><br />
+        Comment: <textarea name="comment" ></textarea></><br />
         <input type="hidden" asp-for="Id" />
         <button type="submit">Register</button>
     </form>
