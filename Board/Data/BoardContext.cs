@@ -17,5 +17,6 @@ namespace Board.Data
         public DbSet<Board.Models.Notice> Notice { get; set; } = default!;
         public DbSet<Board.Models.Comments> Comments { get; set; } 
 
+
     }
 }

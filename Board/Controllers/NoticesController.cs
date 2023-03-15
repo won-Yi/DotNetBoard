@@ -34,7 +34,7 @@ namespace Board.Controllers
 
         public DateTime UpdateDate { get; set; }
 
-        public List<Comments> comments { get; set; }
+        public List<Comments> Comments { get; set; }
     }
 
 
@@ -64,10 +64,10 @@ namespace Board.Controllers
             // 결국 이게 _context를 통해 Notice Model에 연결되어 ToListAsync()함수를 통해 목록 list가 나온다는 이야기.
         }
 
-        public class DtoClass{
-            List<Notice> notice = new List<Notice>();
-            List<Comments> comments = new List<Comments>();
-        }
+        //public class DtoClass{
+        //    List<Notice> notice = new List<Notice>();
+        //    List<Comments> comments = new List<Comments>();
+        //}
 
         // GET: Notices/Details/5
         public async Task<IActionResult> Details(int? id, [Bind("Id,Comment,UserName")] Notice notice)
@@ -79,54 +79,40 @@ namespace Board.Controllers
                 return NotFound();
             }
 
-            await _context.Notice
-                .FirstOrDefaultAsync(m => m.Id == id);
-
-
-
-
-
             //FirstOrDefaultAsync()는 시퀀스의 첫 번째 요소를 비동기적으로 반환하거나,
             //시퀀스에 요소가 없는 경우 기본값을 반환합니다.
             //(m => m.Id == id)에서 m은 어디서 설정이 안되어 있지만 모델로 간주.
 
-            //게시글에 달린 댓글목록을 가져와야한다.
+            notice = await _context.Notice.FirstOrDefaultAsync(m => m.Id == id);
 
-            //var comment = _context.Comments.FirstOrDefault(m => m.Notice_id == id);
-
-            //if ( comment == null) {
-            //    return View(notice);
-            //}
-
-            //ViewBag.username = comment.UserName;
-            //ViewBag.comment = comment.Comment;
-            //
+            //var comment = from m in _context.Comments select m;
+            //comment = comment.Where(s => s.Notice_id == id);
 
 
-            //var dto = new BookDto()
-            //{
-            //    Id = book.Id,
-            //    Title = book.Title,
-            //    AuthorName = book.Author.Name
-            //Notice List()ViewNotice { get; private set; }
-            //Notice ViewNotice { get; private set; }
-            //};
+            var comment = from m in _context.Comments where m.Notice_id == id select m;
 
-            var comment = from m in _context.Comments select m;
-            comment = comment.Where(s => s.Notice_id==id);
 
-           
+            var notice_dto = new NoticeDto()
+            {
+                Id = notice.Id,
+                UserName = notice.UserName,
+                Content = notice.Content,
+                Title = notice.Title,
+                UpdateDate = notice.UpdateDate,
+
+                Comments = comment.ToList(),
+               
+            };
             
 
+            //ModelView를 가지고 놀아볼 시간 Let's begin!
 
-//ModelView를 가지고 놀아볼 시간 Let's begin!
-
-if (notice == null)
+            if (notice_dto == null)
             {
                 return NotFound();
             }
 
-            return View(notice);
+            return View(notice_dto);
         }
 
         // GET: Notices/Create
@@ -134,6 +120,7 @@ if (notice == null)
         {
             return View();
         }
+
 
         // POST: Notices/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -287,7 +274,7 @@ if (notice == null)
 
                 _context.Add(comments);
                 await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                Response.Redirect("Details/"+id);
             }
 
             Debug.WriteLine("여기가 실행되는거지?");
