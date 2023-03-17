@@ -17,6 +17,7 @@ using Microsoft.Identity.Client;
 using System.Reflection;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.IdentityModel.Tokens;
 
 namespace Board.Controllers
 {
@@ -26,6 +27,8 @@ namespace Board.Controllers
     public class NoticeDto
     {
         public int Id { get; set; }
+
+        public int Views_Number { get; set; }
         public string Title { get; set; }
 
         public string Content { get; set; }
@@ -35,6 +38,8 @@ namespace Board.Controllers
         public DateTime UpdateDate { get; set; }
 
         public List<Comments> Comments { get; set; }
+       
+        public string? Category { get; set; }
     }
 
 
@@ -50,26 +55,42 @@ namespace Board.Controllers
         }
 
 
+
         // GET: Notices
-        public async Task<IActionResult> Index()
+        [ActionName("Index")]
+        public async Task<IActionResult> Index(string Category, string searchString)
         {
 
-            Notice notice = new Notice();
+            //LINQ to get list of category
+            IQueryable<string> categoryQuery = from m in _context.Notice
+                                               select m.Category;
+
+            var notice = from m in _context.Notice select m;
+           
+
+            if (!string.IsNullOrEmpty(searchString)) {
+                notice = notice.Where(x => x.Title!.Contains(searchString));
+                return View(notice);
+
+            }
+
+            if (!string.IsNullOrEmpty(Category))
+            {
+                notice = notice.Where(x => x.Category == Category);
+            }
             var notice_list = Enumerable.Reverse(_context.Notice).ToList();
 
+            //var noticeCategory = new NoticeCategory();
+            //{
+            //    noticeCategory.Categorys = new SelectList(await categoryQuery.Distinct().ToListAsync());
+            //    noticeCategory.Notices = Enumerable.Reverse(_context.Notice).ToList();
 
-            return View(notice_list);
+            //}
 
-            // ToListAsync().설명.. List<T> 비동기적으로 열거하여 A를 IQueryable 만듭니다.
-            // 결국 이게 _context를 통해 Notice Model에 연결되어 ToListAsync()함수를 통해 목록 list가 나온다는 이야기.
+            //return View(await notice.ToListAsync());
+
+            //return View(notice_list);
         }
-
-        //public class DtoClass{
-        //    List<Notice> notice = new List<Notice>();
-        //    List<Comments> comments = new List<Comments>();
-        //}
-
-
 
         // GET: Notices/Details/5
         public async Task<IActionResult> Details(int? id, [Bind("Id,Comment,UserName")] Notice notice)
@@ -81,17 +102,18 @@ namespace Board.Controllers
                 return NotFound();
             }
 
-            //FirstOrDefaultAsync()는 시퀀스의 첫 번째 요소를 비동기적으로 반환하거나,
-            //시퀀스에 요소가 없는 경우 기본값을 반환합니다.
-            //(m => m.Id == id)에서 m은 어디서 설정이 안되어 있지만 모델로 간주.
-
             notice = await _context.Notice.FirstOrDefaultAsync(m => m.Id == id);
+            
+            //조회수 추가
+            notice.Views_Number++;
+            await _context.SaveChangesAsync();
 
             //var comment = from m in _context.Comments select m;
             //comment = comment.Where(s => s.Notice_id == id);
 
 
             var comment = from m in _context.Comments where m.Notice_id == id select m;
+
 
 
             var notice_dto = new NoticeDto()
@@ -101,6 +123,7 @@ namespace Board.Controllers
                 Content = notice.Content,
                 Title = notice.Title,
                 UpdateDate = notice.UpdateDate,
+                Views_Number = notice.Views_Number,
 
                 Comments = comment.ToList(),
                
@@ -129,7 +152,7 @@ namespace Board.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Title,Content,UserName")] Notice notice)
+        public async Task<IActionResult> Create([Bind("Id,Title,Content,UserName,Category")] Notice notice)
         {
             if (ModelState.IsValid)
             {
