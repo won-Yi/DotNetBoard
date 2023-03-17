@@ -11,6 +11,12 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Create">
+            <select asp-for="Category" name="Category">
+                <option value="">All</option>
+                <option value="잡담">잡담</option>
+                <option value="정보">정보</option>
+                <option value="무료나눔">무료나눔</option>
+            </select>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="Title" class="control-label"></label>

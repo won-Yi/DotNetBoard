@@ -1,4 +1,5 @@
-﻿@model IEnumerable<Board.Models.Notice>
+﻿@*@model IEnumerable<Board.Models.Notice>*@
+@model Board.Models.NoticeCategory
 
 @{
     ViewData["Title"] = "Index";
@@ -9,33 +10,44 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
+
+<select asp-for="Category" asp-items="Model.Categorys">
+    <option value="">All</option>
+</select>
+
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Id)
+                @Html.DisplayNameFor(model => model.Notices![0].Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
-            </th>
-            @*<th>
-                @Html.DisplayNameFor(model => model.Content)
-            </th>*@
-            <th>
-                @Html.DisplayNameFor(model => model.UserName)
+                @Html.DisplayNameFor(model => model.Notices![0].Category)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UpdateDate)
+                @Html.DisplayNameFor(model => model.Notices![0].Title)
             </th>
-            <th></th>
+            <th>
+                @Html.DisplayNameFor(model => model.Notices![0].UserName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Notices![0].UpdateDate)
+            </th>
+            <th>
+                조회수
+            </th>
         </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model) {
+    @foreach (var item in Model.Notices) {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Id)
             </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category)
+                </td>
             <td>
                <a asp-action="Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Title)</a> 
             </td>
@@ -49,11 +61,17 @@
                 @Html.DisplayFor(modelItem => item.UpdateDate)
             </td>
             <td>
-              
+                    @Html.DisplayFor(modelItem => item.Views_Number)
                @* <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
                 <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>*@
             </td>
+           
         </tr>
 }
-    </tbody>
+        <form asp-action="Index" method="get">
+            <p>
+                Title: <input type="text" name="SearchString" />
+                <input type="submit" value="Filter" />
+            </p>
+        </form>
 </table>
