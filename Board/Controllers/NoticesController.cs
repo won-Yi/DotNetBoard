@@ -69,6 +69,8 @@ namespace Board.Controllers
         //    List<Comments> comments = new List<Comments>();
         //}
 
+
+
         // GET: Notices/Details/5
         public async Task<IActionResult> Details(int? id, [Bind("Id,Comment,UserName")] Notice notice)
         {
@@ -104,7 +106,7 @@ namespace Board.Controllers
                
             };
             
-
+            
             //ModelView를 가지고 놀아볼 시간 Let's begin!
 
             if (notice_dto == null)
@@ -146,13 +148,15 @@ namespace Board.Controllers
         // GET: Notices/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
+
             if (id == null || _context.Notice == null)
             {
                 return NotFound();
             }
-
-            Notice notice = new Notice();
-            _context.Notice.FindAsync(id);
+            Notice notice = new Notice();           
+            notice = _context.Notice.FirstOrDefault(x => x.Id == id);
+            
            
 
             if (notice == null)
@@ -169,6 +173,8 @@ namespace Board.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,UserName")] Notice notice)
         {
+
+
             if (id != notice.Id)
             {
                 return NotFound();
@@ -237,14 +243,12 @@ namespace Board.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-
-        //Comment
         [HttpPost, ActionName("CommentCreate")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CommentCreate(int? id , string Username, string Comment)
+        public async Task<IActionResult> CommentCreate(int? id, string Username, string Comment)
         {
 
-            
+
             if (ModelState.IsValid)
             {
                 Comments comments = new Comments();
@@ -266,19 +270,75 @@ namespace Board.Controllers
                 //현재 시간을 데이터 베이스에 넣어준다.
                 DateTime time_now = DateTime.Now;
                 comments.UpdateTime = time_now;
-               
-
-
                 Debug.WriteLine(comments);
-                
+
 
                 _context.Add(comments);
                 await _context.SaveChangesAsync();
-                Response.Redirect("Details/"+id);
+                Response.Redirect("Details/" + id);
             }
 
             Debug.WriteLine("여기가 실행되는거지?");
             return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CommentEdit(int? id, int Id, string UserName, string editComment )
+        {
+
+
+            Comments comments = new Comments();
+            comments.Notice_id = (int)id;
+            comments.UserName = (string)UserName;   
+            comments.Comment = editComment;
+            comments.Id = (int)Id;
+
+
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    DateTime time_now = DateTime.Now;
+                    comments.UpdateTime = time_now;
+
+                    _context.Update(comments);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!NoticeExists(comments.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction(nameof(Index));
+            }
+            return RedirectToAction(nameof(Index));
+        }
+
+        
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CommentDelete(int? commentId)
+        {
+            if (_context.Notice == null)
+            {
+                return Problem("Entity set 'BoardContext.Notice'  is null.");
+            }
+            var comment = await _context.Comments.FindAsync(commentId);
+            if (comment != null)
+            {
+                _context.Comments.Remove(comment);
+            }
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
 
 
