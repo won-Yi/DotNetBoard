@@ -58,7 +58,7 @@ namespace Board.Controllers
 
         // GET: Notices
         [ActionName("Index")]
-        public async Task<IActionResult> Index(string Category, string searchString)
+        public async Task<IActionResult> Index(string? Category, string? searchString)
         {
 
             //LINQ to get list of category
@@ -70,26 +70,24 @@ namespace Board.Controllers
 
             if (!string.IsNullOrEmpty(searchString)) {
                 notice = notice.Where(x => x.Title!.Contains(searchString));
-                return View(notice);
-
             }
 
             if (!string.IsNullOrEmpty(Category))
             {
                 notice = notice.Where(x => x.Category == Category);
+              
             }
-            var notice_list = Enumerable.Reverse(_context.Notice).ToList();
+            var noticeCategory = new NoticeCategory
+            {
+                Categorys = new SelectList(await categoryQuery.Distinct().ToListAsync()),
+                Notices = await notice.ToListAsync()
+                
 
-            //var noticeCategory = new NoticeCategory();
-            //{
-            //    noticeCategory.Categorys = new SelectList(await categoryQuery.Distinct().ToListAsync());
-            //    noticeCategory.Notices = Enumerable.Reverse(_context.Notice).ToList();
+            };
+           
+            //var notice_list = Enumerable.Reverse(_context.Notice).ToList();
 
-            //}
-
-            //return View(await notice.ToListAsync());
-
-            //return View(notice_list);
+            return View(noticeCategory);
         }
 
         // GET: Notices/Details/5
@@ -268,7 +266,7 @@ namespace Board.Controllers
 
         [HttpPost, ActionName("CommentCreate")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CommentCreate(int? id, string Username, string Comment)
+        public async Task<IActionResult> CommentCreate(int? id, string? Username, string? Comment)
         {
 
 
