@@ -44,6 +44,9 @@ namespace Board.Controllers
         public List<Comments> Comments { get; set; }
         public string Category { get; set; }
 
+        public string? FileName { get; set; }
+        public string? fileAttachMent { get; set; }
+
     }
 
 
@@ -59,7 +62,6 @@ namespace Board.Controllers
         }
 
 
-
         // GET: Notices
         [ActionName("Index")]
         public async Task<IActionResult> Index(string? Category, string? searchString)
@@ -67,25 +69,29 @@ namespace Board.Controllers
 
             //LINQ to get list of category
             IQueryable<string> categoryQuery = from m in _context.Notice
+                                               orderby m.UpdateDate descending
                                                select m.Category;
 
             var notice = from m in _context.Notice select m;
-           
+            notice = from m in _context.Notice orderby m.UpdateDate descending select m;
 
             if (!string.IsNullOrEmpty(searchString)) {
-                notice = notice.Where(x => x.Title!.Contains(searchString));
+
+                notice = notice.Where(x => x.Title!.Contains(searchString)); 
             }
 
             if (!string.IsNullOrEmpty(Category))
             {
+               
                 notice = notice.Where(x => x.Category == Category);
               
             }
+
             var noticeCategory = new NoticeCategory
             {
                 Categorys = new SelectList(await categoryQuery.Distinct().ToListAsync()),
                 Notices = await notice.ToListAsync()
-
+                
             };
            
             //var notice_list = Enumerable.Reverse(_context.Notice).ToList();
@@ -97,7 +103,6 @@ namespace Board.Controllers
         public async Task<IActionResult> Details(int? id, [Bind("Id,Comment,UserName")] Notice notice)
         {
 
-
             if (id == null || _context.Notice == null)
             {
                 return NotFound();
@@ -107,8 +112,6 @@ namespace Board.Controllers
                 notice.Views_Number++;
                 await _context.SaveChangesAsync();
             
-            //var comment = from m in _context.Comments select m;
-            //comment = comment.Where(s => s.Notice_id == id);
 
 
             var comment = from m in _context.Comments where m.Notice_id == id select m;
@@ -122,8 +125,8 @@ namespace Board.Controllers
                 UpdateDate = notice.UpdateDate,
                 Views_Number = notice.Views_Number,
 
-                    Comments = comment.ToList(),
-                    
+                Comments = comment.ToList(),
+                FileName = notice.FileName,
             };
             
 
@@ -170,64 +173,26 @@ namespace Board.Controllers
         
         }
 
-
-        // POST: Notices/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(IList<IFormFile> Files,int Id ,string Title, string Content, string UserName,string Category)
+        public async Task<IActionResult> Create(List<IFormFile> files, [Bind("Id", "Title", "Content", "UserName", "Category")] Notice notice)
         {
+            int result = -1;
 
-
-            //int result = -1;
-
-            //string uploadDir = "D:/code/Board/UploadPath/";
-            //try
-            //{
-            //    // 업로드 폴더 경로 존재 확인
-            //    DirectoryInfo di = new DirectoryInfo(uploadDir);
-            //    // 폴더가 없을 경우 신규 작성
-            //    if (di.Exists == false) di.Create();
-
-            //    // 선택한 파일 개수만큼 반복
-            //    foreach (var formFile in Files)
-            //    {
-            //        if (formFile.Length > 0)
-            //        {
-            //            var fileFullPath = uploadDir + formFile.FileName;
-
-            //            // 파일명이 이미 존재하는 경우 파일명 변경
-            //            int filecnt = 1;
-            //            String newFilename = string.Empty;
-            //            while (new FileInfo(fileFullPath).Exists)
-            //            {
-            //                var idx = formFile.FileName.LastIndexOf('.');
-            //                var tmp = formFile.FileName.Substring(0, idx);
-            //                newFilename = tmp + String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
-            //                fileFullPath = uploadDir + newFilename;
-            //            }
-
-            //            // 파일 업로드
-            //            using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
-            //            {
-            //                await formFile.CopyToAsync(stream);
-            //            }
-            //        }
-            //    }
-            //    result = 0;
-            //}
-            //catch (Exception)
-            //{
-            //    throw;
-            //}
-            //return Json(new { result = result });
-
-
-            Notice notice = new Notice();
-
-            if (ModelState.IsValid)
+            string uploadDir = "D:/code/Board/UploadPath/";
+            try
             {
+                // 업로드 폴더 경로 존재 확인
+                DirectoryInfo di = new DirectoryInfo(uploadDir);
+                // 폴더가 없을 경우 신규 작성
+                if (di.Exists == false) di.Create();
+
+                // 선택한 파일 개수만큼 반복
+                foreach (var formFile in files)
+                {
+                    if (formFile.Length > 0)
+                    {
+                        var fileFullPath = uploadDir + formFile.FileName;
 
                         // 파일명이 이미 존재하는 경우 파일명 변경
                         int filecnt = 1;
@@ -242,6 +207,7 @@ namespace Board.Controllers
 
 
                         notice.fileAttachMent = fileFullPath;
+                        notice.FileName = formFile.FileName;
 
 
                         // 파일 업로드
@@ -265,12 +231,8 @@ namespace Board.Controllers
                 //현재 시간을 데이터 베이스에 넣어준다.
                 DateTime time_now = DateTime.Now;
                 notice.UpdateDate = time_now;
-                notice.UserName = UserName;
-                notice.Title = Title;
-                notice.Content = Content;
-                notice.Id = Id;
-                notice.Category = Category;
-            
+
+
                 _context.Add(notice);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
@@ -280,31 +242,31 @@ namespace Board.Controllers
 
         // GET: Notices/Edit/5
         public async Task<IActionResult> Edit(int? id)
+    {
+
+
+        if (id == null || _context.Notice == null)
         {
-
-
-            if (id == null || _context.Notice == null)
-            {
-                return NotFound();
-            }
-            Notice notice = new Notice();           
-            notice = _context.Notice.FirstOrDefault(x => x.Id == id);
+            return NotFound();
+        }
+        Notice notice = new Notice();           
+        notice = _context.Notice.FirstOrDefault(x => x.Id == id);
             
            
 
-            if (notice == null)
-            {
-                return NotFound();
-            }
-            return View(notice);
+        if (notice == null)
+        {
+            return NotFound();
         }
+        return View(notice);
+    }
 
         // POST: Notices/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,UserName")] Notice notice)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,UserName,Category")] Notice notice)
         {
 
 
@@ -340,42 +302,41 @@ namespace Board.Controllers
         }
 
         // GET: Notices/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Notice == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null || _context.Notice == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var notice = await _context.Notice
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (notice == null)
-            {
-                return NotFound();
-            }
+        //    var notice = await _context.Notice
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (notice == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(notice);
-        }
+        //    return View(notice);
+        //}
 
         // POST: Notices/Delete/5
-        //ActionName("Delete")
+        //ActionName("DeleteConfirmed")
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int? id)
         {
             if (_context.Notice == null)
             {
-                return Problem("Entity set 'BoardContext.Notice'  is null.");
+                return Problem("Entity set 'BoardContext.Notice' is null.");
             }
             var notice = await _context.Notice.FindAsync(id);
-            if (notice != null)
-            {
-                _context.Notice.Remove(notice);
-            }
-            
+           
+            _context.Notice.Remove(notice);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
+
+
 
         [HttpPost, ActionName("CommentCreate")]
         [ValidateAntiForgeryToken]
@@ -479,7 +440,7 @@ namespace Board.Controllers
             }
             else
             {
-                return RedirectToAction("Details", "Notices", new { id = commentId });
+                return RedirectToAction("Details", "Notices", new { id = notice.Id });
             }
         }
 

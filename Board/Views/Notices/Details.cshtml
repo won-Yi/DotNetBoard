@@ -8,32 +8,23 @@
 @section Scripts {
     <script>
         function DeleteFunction(id) {
-            console.log(id)
-            console.log('실행');
-            alert('되니?')
             let isExecuted = confirm("게시글을 삭제하시겠습니까?");
-            if (isExecuted) {
-                var formData = $("#form-delete").serialize();
+            if (isExecuted == true) {
+                //var formData = $("#form-delete").serialize();
                     $.ajax({
-                    url: '/Notices/Delete/' + id,
-                        type: "GET",
-                        data: formData,
+                        url: 'https://localhost:7295/Notices/Delete/' + id,
+                        type: "POST",
+                        //data: formData,
                         success: function (data) {
-                            if (data.result == 0) {
-                               console.log('사실 안됐는데 눈속임')
-                            }
-                            else {
-                                console.log(data)
-                            alert('삭제성공')
-                            }
                         },
                     });
-            
             }else{
-                alert('뭔가 기능이 아예 안됨');
+                alert('삭제취소');
                 }
             }
-        $(document).ready(function () {
+        
+            
+            $(document).ready(function () {
             var controll = false;
             $(".editBtn").click(function () {
                 controll = !controll;
@@ -56,59 +47,48 @@
             });
         });
 
-        $(document).ready(function () {
-            if (@Model.fileAttachMent == null) {
+        function fileCheck(filename){
+            console.log(typeof filename)
+            console.log(filename)
+                if (filename == "") {
+                 alert('첨부된 파일이 없습니다.');
                 $('#downloadZone').hide();
             } else {
                 $('#downloadZone').show();
             }
-        });
+        }
+            
     </script>
 }
 
-<h1>Details</h1>
+@*게시글 보는 곳*@
+<div class="whole-wrap">
 
-<div>
-    <h4>Notice</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(@Model => @Model.Title)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(@Model => @Model.Title)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(@Model => @Model.Content)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(@Model => @Model.Content)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(@Model => @Model.UserName)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(@Model => @Model.UserName)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(@Model => @Model.UpdateDate)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(@Model => @Model.UpdateDate)
-        </div>       
+    <div class="titleSection">
+        @Html.DisplayFor(@Model => @Model.Category)
+        <h4> @Html.DisplayFor(@Model => @Model.Title) </h4>
     </div>
-        @*파일 다운로드*@
-        <div id="downloadZone">
-            <h6>Download File</h6>
-            <a asp-action="FileDownload" asp-route-id="@Model?.Id">@Model.FileName File Download</a>
-        </div>
 
+    <div style="background-color:#F4FFFF; padding-left:20px; padding-right:20px; display:flex; justify-content:space-between;">
+        <div>
+            @Html.DisplayFor(@Model => @Model.UserName) 님
+        </div>
+        <div>
+            @Html.DisplayFor(@Model => @Model.UpdateDate)
+        </div>
+    </div>
+
+    @*파일다운로드*@
+    <input type="button" onclick="fileCheck('@Model.FileName')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;"/>
+    <div id="downloadZone" style="display:none; margin-top:10px;">
+        <h6>Download File</h6>
+        <a asp-action="FileDownload" asp-route-id="@Model.Id">@Model.FileName File Download</a>
+    </div>
     <div class="board-section">
         <div style="padding:20px;">
             @Html.DisplayFor(@Model => @Model.Content)
             @*  <a href="@Url.Action("DownloadFile", "Notices", new { id = Model.Id })">Download file</a>*@
         </div>
-        
 
         <div style="display:flex; margin-top:20px;">
             @*게시글 수정/삭제 버튼*@
@@ -116,151 +96,98 @@
                 <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">게시글 수정</a>
             </div>
             <div>
-                @*asp-route-id="@Model?.Id"*@
-                <form asp-action="Delete" id="form-delete">
-                    <input type="hidden" asp-for="Id" />
-                    <input type="submit" value="게시글 삭제" class="btn btn-danger"  /> 
-                    @*onclick="DeleteFunction('@Model?.Id')*@
-                </form>
-                @*<button class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')">게시글 삭제</button>*@
+                @*<form action="Delete" id="form-delete" method="post">*@
+                    @*<input type="hidden" asp-for="Id" />*@
+                    @*asp-route-id="@Model?.Id"*@
+                    <input type="button" class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')" value="게시글 삭제"></input>
+                @*</form>*@
             </div>
         </div>
         <hr />
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>
-                    댓글내용
-                </th>
-                <th>
-                    이름
-                </th>
-                <th>
-                    수정/삭제
-                </th>
-            </tr>
-        </thead>
-        <tbody id="firstPage">
-                @foreach (var item in Model.Comments)
-                {
-                <div class="userName-section">
-                  @Html.DisplayFor(modelItem => item.UserName) 님
-                </div>
-                  <div style="display:flex; justify-content:space-between; align-items: center; ">
-                    <div class="commentText-section">
-                        @Html.DisplayFor(modelItem => item.Comment)
-                    </div>
+        <div class="comment-section">
+            @*댓글보는 곳*@
+            <h6>댓글</h6>
+            <table class="table">
+                <tbody id="firstPage">
+                    @foreach (var item in Model.Comments)
+                    {
+                        <div class="userName-section" style="background-color:#E8F5FF;">
+                            @Html.DisplayFor(modelItem => item.UserName) 님
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items: center; ">
+                            <div class="commentText-section">
+                                @Html.DisplayFor(modelItem => item.Comment)
+                            </div>
                             <div style="display:flex; margin-top:20px; align-items: center;">
-                        @*게시글 수정 버튼*@
-                        <div style="margin-right:10px;">
-                            <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">수정</a>
-                        </div>
-                        <div>
-                            @*코멘트 삭제 *@
-                        <form asp-action="CommentDelete" method="post" >
-                            <input type="hidden" name="commentId" asp-for="@item.Id" />
+                                @*게시글 수정*@
+                                <div style="margin-right:10px;">
+                                    <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">수정</a>
+                                </div>
+                                <div>
+                                    <form asp-action="CommentDelete" method="post">
+                                        <input type="hidden" name="commentId" asp-for="@item.Id" />
                                         <input type="hidden" name="Id" asp-for="@Model.Id" />
-                            <input type="submit" value="삭제" class="btn btn-outline-danger" />
-                        </form>
-                        </td>
-                    </tr>
-                }
-        </tbody>
-        <td>
-            <button id="cancel">댓글수정 취소</button>
-        </td>
-      @*  <div id="secondContent">*@
-            <!-- Modal -->
-            
-        
+                                        <input type="submit" value="Delete" class="btn btn-outline-danger" />
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </tbody>
+        </div>
+        @*<td>
+        <button id="cancel">댓글수정 취소</button>
+        </td>*@
+        @*  <div id="secondContent">*@
+
+
+        <!-- Modal -->
         <form asp-action="CommentEdit" method="post">
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                                <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body" id="commentBody">
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body" id="commentBody">
                             <input type="text" name="editComment" />
-                             @*model.id = notice id, username도 notice username일걸?*@
+                            @*model.id = notice id, username도 notice username일걸?*@
                             <input type="hidden" asp-for="@Model.Id" />
-                            </div>
-                            <div class="modal-footer">
-                           
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="submit" class="btn btn-primary" id="saveBtn">Save changes</button>
-                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-primary" id="saveBtn">Save changes</button>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
+        </form>
         @*</div>*@
-                   
-                
+
+        </table>
 
 
-    </table>
-    <div>
-
-        <div>
-            <a asp-action="Edit" class="btn btn-primary" asp-route-id="@Model?.Id">Edit</a>
-        </div>
-        <div>
-            <a asp-action="Delete" class="btn btn-danger" asp-route-id="@Model?.Id">Delete</a>
-        </div>
-
-    </div>
-
-   @* comment Post 나올때 쓸 from tag*@
-   @* <form asp-action="CommentEdit" method="post">
+        @* comment Post 나올때 쓸 from tag*@
+        @* <form asp-action="CommentEdit" method="post">
         <input type="hidden" asp-for="Id" />
         <button type="submit">Register</button>
-    </form>*@
+        </form>*@
 
+        @*코멘트 작성 부분*@
+        <div>
+            <form asp-action="CommentCreate" method="post">
+                <div style="margin-bottom:20px;">
+                    이름:  <input type="text" name="username" /> <br />
+                </div>
+                <div style="display:flex; margin-bottom:20px;">
+                    <textarea rows="4" cols="90" name="comment"></textarea><br />
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-secondary btn-lg">댓글등록</button>
+                </div>
+            </form>
 
-   
-
-    <div>
-        <form asp-action="CommentCreate" method="post">
-            username:  <input type="text" name="username" /> <br />
-            Comment: <textarea name="comment"></textarea><br />
-            <input type="hidden" asp-for="Id" />
-            <button type="submit">Register</button>
-        </form>
-       
-    <a asp-action="Index">Back to List</a>
+            <a asp-action="Index">Back to List</a>
+        </div>
     </div>
-</div>
-
-@*<div>
-    <h4>Notice</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Content)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Content)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UserName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UserName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdateDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdateDate)
-        </dd>
-    </dl>
-    <div>*@
