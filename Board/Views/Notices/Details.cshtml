@@ -8,32 +8,23 @@
 @section Scripts {
     <script>
         function DeleteFunction(id) {
-            console.log(id)
-            console.log('실행');
-            alert('되니?')
             let isExecuted = confirm("게시글을 삭제하시겠습니까?");
-            if (isExecuted) {
-                var formData = $("#form-delete").serialize();
+            if (isExecuted == true) {
+                //var formData = $("#form-delete").serialize();
                     $.ajax({
-                    url: '/Notices/Delete/' + id,
-                        type: "GET",
-                        data: formData,
+                        url: 'https://localhost:7295/Notices/Delete/' + id,
+                        type: "POST",
+                        //data: formData,
                         success: function (data) {
-                            if (data.result == 0) {
-                               console.log('사실 안됐는데 눈속임')
-                            }
-                            else {
-                                console.log(data)
-                            alert('삭제성공')
-                            }
                         },
                     });
-            
             }else{
-                alert('뭔가 기능이 아예 안됨');
+                alert('삭제취소');
                 }
             }
-        $(document).ready(function () {
+        
+            
+            $(document).ready(function () {
             var controll = false;
             $(".editBtn").click(function () {
                 controll = !controll;
@@ -56,13 +47,17 @@
             });
         });
 
-        $(document).ready(function () {
-            if (@Model.fileAttachMent == null) {
+        function fileCheck(filename){
+            console.log(typeof filename)
+            console.log(filename)
+                if (filename == "") {
+                 alert('첨부된 파일이 없습니다.');
                 $('#downloadZone').hide();
             } else {
                 $('#downloadZone').show();
             }
-        });
+        }
+            
     </script>
 }
 
@@ -83,10 +78,12 @@
         </div>
     </div>
 
-    <h4>Download File</h4>
-    <br />
-    <a asp-action="FileDownload" asp-for="">File Download</a>
-    
+    @*파일다운로드*@
+    <input type="button" onclick="fileCheck('@Model.FileName')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;"/>
+    <div id="downloadZone" style="display:none; margin-top:10px;">
+        <h6>Download File</h6>
+        <a asp-action="FileDownload" asp-route-id="@Model.Id">@Model.FileName File Download</a>
+    </div>
     <div class="board-section">
         <div style="padding:20px;">
             @Html.DisplayFor(@Model => @Model.Content)
@@ -99,8 +96,11 @@
                 <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">게시글 수정</a>
             </div>
             <div>
-                @*asp-route-id="@Model?.Id"*@
-                <button class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')">게시글 삭제</button>
+                @*<form action="Delete" id="form-delete" method="post">*@
+                    @*<input type="hidden" asp-for="Id" />*@
+                    @*asp-route-id="@Model?.Id"*@
+                    <input type="button" class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')" value="게시글 삭제"></input>
+                @*</form>*@
             </div>
         </div>
         <hr />

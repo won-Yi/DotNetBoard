@@ -196,7 +196,7 @@ namespace Board.Controllers
 
 
                         notice.fileAttachMent = fileFullPath;
-                        notice.FileName = newFilename;
+                        notice.FileName = formFile.FileName;
 
 
                         // 파일 업로드
@@ -255,7 +255,7 @@ namespace Board.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,UserName")] Notice notice)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Content,UserName,Category")] Notice notice)
         {
 
 
@@ -291,39 +291,36 @@ namespace Board.Controllers
         }
 
         // GET: Notices/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Notice == null)
-            {
-                return NotFound();
-            }
+        //public async Task<IActionResult> Delete(int? id)
+        //{
+        //    if (id == null || _context.Notice == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            var notice = await _context.Notice
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (notice == null)
-            {
-                return NotFound();
-            }
+        //    var notice = await _context.Notice
+        //        .FirstOrDefaultAsync(m => m.Id == id);
+        //    if (notice == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return View(notice);
-        }
+        //    return View(notice);
+        //}
 
         // POST: Notices/Delete/5
-        //ActionName("Delete")
+        //ActionName("DeleteConfirmed")
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> Delete(int? id)
         {
             if (_context.Notice == null)
             {
-                return Problem("Entity set 'BoardContext.Notice'  is null.");
+                return Problem("Entity set 'BoardContext.Notice' is null.");
             }
             var notice = await _context.Notice.FindAsync(id);
-            if (notice != null)
-            {
-                _context.Notice.Remove(notice);
-            }
-            
+           
+            _context.Notice.Remove(notice);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
