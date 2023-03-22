@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +20,8 @@ using System.Reflection;
 using Microsoft.CodeAnalysis.VisualBasic.Syntax;
 using System.ComponentModel.DataAnnotations;
 using Microsoft.IdentityModel.Tokens;
+using static Dropbox.Api.Files.ListRevisionsMode;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Board.Controllers
 {
@@ -157,9 +161,16 @@ namespace Board.Controllers
 
 
         // GET: Notices/Create
-        public IActionResult Create()
-        {
+        public IActionResult Create() {
+           
+            IQueryable<string> categoryQuery = from m in _context.Notice
+                                               select m.Category;
+
+            var Categorys = new SelectList(categoryQuery.ToList().Distinct());
+            ViewBag.Categories = Categorys;
+
             return View();
+        
         }
 
         [HttpPost]
