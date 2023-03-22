@@ -5,25 +5,25 @@
 namespace Board.Migrations
 {
     /// <inheritdoc />
-    public partial class ModifyCommentsDB : Migration
+    public partial class filenamefieldadd : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "Noitce_id",
-                table: "Comments",
-                type: "int",
+            migrationBuilder.AddColumn<string>(
+                name: "FileNames",
+                table: "FileModel",
+                type: "nvarchar(max)",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Noitce_id",
-                table: "Comments");
+                name: "FileNames",
+                table: "FileModel");
         }
     }
 }

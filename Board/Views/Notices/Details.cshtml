@@ -79,11 +79,16 @@
     </div>
 
     @*파일다운로드*@
-    <input type="button" onclick="fileCheck('@Model.FileName')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;"/>
-    <div id="downloadZone" style="display:none; margin-top:10px;">
-        <h6>Download File</h6>
-        <a asp-action="FileDownload" asp-route-id="@Model.Id">@Model.FileName File Download</a>
-    </div>
+    @foreach (var item in Model.FileModel)
+    {
+    <input type="button" onclick="fileCheck('@Model.FileModel')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;"/>
+    
+        <div id="downloadZone" style="display:none; margin-top:10px;">
+            <h6>Download File</h6>
+            <a asp-action="FileDownload" asp-route-id="@Model.Id">@Html.DisplayFor(modelItem => item.FilePath) File Download</a>
+        </div>
+    }
+    
     <div class="board-section">
         <div style="padding:20px;">
             @Html.DisplayFor(@Model => @Model.Content)

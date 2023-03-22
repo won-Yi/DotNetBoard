@@ -42,6 +42,8 @@ namespace Board.Controllers
         public DateTime UpdateDate { get; set; }
 
         public List<Comments> Comments { get; set; }
+
+        public List<FileModel> FileModel { get; set; }
         public string Category { get; set; }
 
         public string? FileName { get; set; }
@@ -116,6 +118,8 @@ namespace Board.Controllers
 
             var comment = from m in _context.Comments where m.Notice_id == id select m;
 
+            var filemodel = from m in _context.FileModel where m.NoticeId == id select m;
+
             var notice_dto = new NoticeDto()
             {
                 Id = notice.Id,
@@ -124,7 +128,8 @@ namespace Board.Controllers
                 Title = notice.Title,
                 UpdateDate = notice.UpdateDate,
                 Views_Number = notice.Views_Number,
-
+               
+                FileModel = filemodel.ToList(),
                 Comments = comment.ToList(),
                 FileName = notice.FileName,
             };
@@ -205,9 +210,17 @@ namespace Board.Controllers
                             fileFullPath = uploadDir + newFilename;
                         }
 
+                        FileModel model = new FileModel();
+                        
+                        model.FilePath = fileFullPath;
+                        model.NoticeId = notice.Id;
 
-                        notice.fileAttachMent = fileFullPath;
-                        notice.FileName = formFile.FileName;
+                        _context.Add(model);
+                        await _context.SaveChangesAsync();
+                        
+
+                        //notice.fileAttachMent = fileFullPath;
+                        //notice.FileName = formFile.FileName;
 
 
                         // 파일 업로드

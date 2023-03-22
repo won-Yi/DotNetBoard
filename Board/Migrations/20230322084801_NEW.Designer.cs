@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Board.Migrations
 {
     [DbContext(typeof(BoardContext))]
-    [Migration("20230317055622_AddViewsNumberField")]
-    partial class AddViewsNumberField
+    [Migration("20230322084801_NEW")]
+    partial class NEW
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -52,6 +52,26 @@ namespace Board.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("Board.Models.FileModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NoticeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FileModel");
+                });
+
             modelBuilder.Entity("Board.Models.Notice", b =>
                 {
                     b.Property<int>("Id")
@@ -60,8 +80,15 @@ namespace Board.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Content")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FileName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Title")
@@ -77,6 +104,12 @@ namespace Board.Migrations
 
                     b.Property<int>("Views_Number")
                         .HasColumnType("int");
+
+                    b.Property<string>("fileAttachMent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("fileContents")
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("Id");
 
