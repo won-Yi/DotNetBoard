@@ -38,8 +38,9 @@ namespace Board.Controllers
         public DateTime UpdateDate { get; set; }
 
         public List<Comments> Comments { get; set; }
-       
-        public string? Category { get; set; }
+        public string Category { get; set; }
+
+        
     }
 
 
@@ -99,13 +100,11 @@ namespace Board.Controllers
             {
                 return NotFound();
             }
-
-            notice = await _context.Notice.FirstOrDefaultAsync(m => m.Id == id);
+                notice = await _context.Notice.FirstOrDefaultAsync(m => m.Id == id);
+                //조회수 추가
+                notice.Views_Number++;
+                await _context.SaveChangesAsync();
             
-            //조회수 추가
-            notice.Views_Number++;
-            await _context.SaveChangesAsync();
-
             //var comment = from m in _context.Comments select m;
             //comment = comment.Where(s => s.Notice_id == id);
 
@@ -123,12 +122,10 @@ namespace Board.Controllers
                 UpdateDate = notice.UpdateDate,
                 Views_Number = notice.Views_Number,
 
-                Comments = comment.ToList(),
-               
+                    Comments = comment.ToList(),
+                    
             };
             
-            
-            //ModelView를 가지고 놀아볼 시간 Let's begin!
 
             if (notice_dto == null)
             {
@@ -137,6 +134,28 @@ namespace Board.Controllers
 
             return View(notice_dto);
         }
+
+
+        //파일 다운로드
+        public FileResult FileDownload(int? Id) {
+
+            Notice notice = new Notice();
+            notice = _context.Notice.FirstOrDefault(m => m.Id == Id);
+
+
+            string filepath = notice.fileAttachMent;        // 파일 경로
+            string filename = notice.FileName;                 // 파일명
+            string path = filepath;          // 파일 경로 / 파일명
+                //+ "/" + filename;
+            
+                
+                // 파일을 바이트 형식으로 읽음
+            byte[] bytes = System.IO.File.ReadAllBytes(path);
+            // 파일 다운로드 처리
+            return File(bytes, "application/octet-stream", filename);
+        }
+
+
 
         // GET: Notices/Create
         public IActionResult Create()
@@ -155,6 +174,39 @@ namespace Board.Controllers
             if (ModelState.IsValid)
             {
 
+                        // 파일명이 이미 존재하는 경우 파일명 변경
+                        int filecnt = 1;
+                        System.String newFilename = string.Empty;
+                        while (new FileInfo(fileFullPath).Exists)
+                        {
+                            var idx = formFile.FileName.LastIndexOf('.');
+                            var tmp = formFile.FileName.Substring(0, idx);
+                            newFilename = tmp + System.String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
+                            fileFullPath = uploadDir + newFilename;
+                        }
+
+
+                        notice.fileAttachMent = fileFullPath;
+
+
+                        // 파일 업로드
+                        using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
+                        {
+                            await formFile.CopyToAsync(stream);
+                        }
+                    }
+                }
+                result = 0;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            //Notice notice = new Notice();
+
+            if (ModelState.IsValid)
+            {
+                //notice.fileAttachment = fileFullPath;
                 //현재 시간을 데이터 베이스에 넣어준다.
                 DateTime time_now = DateTime.Now;
                 notice.UpdateDate = time_now;
@@ -246,7 +298,8 @@ namespace Board.Controllers
         }
 
         // POST: Notices/Delete/5
-        [HttpPost, ActionName("Delete")]
+        //ActionName("Delete")
+        [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
@@ -346,20 +399,28 @@ namespace Board.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CommentDelete(int? commentId)
+        public async Task<IActionResult> CommentDelete(int? commentId, [Bind("Id")] Notice notice)
         {
             if (_context.Notice == null)
             {
                 return Problem("Entity set 'BoardContext.Notice'  is null.");
             }
             var comment = await _context.Comments.FindAsync(commentId);
+            
             if (comment != null)
             {
                 _context.Comments.Remove(comment);
             }
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            if (commentId == null)
+            {
+                return RedirectToAction("Index", "Notices");
+            }
+            else
+            {
+                return RedirectToAction("Details", "Notices", new { id = commentId });
+            }
         }
 
 

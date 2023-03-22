@@ -1,13 +1,38 @@
 ﻿
 @model Board.Controllers.NoticeDto
 
-
 @{
     ViewData["Title"] = "Details";
 }
 
 @section Scripts {
     <script>
+        function DeleteFunction(id) {
+            console.log(id)
+            console.log('실행');
+            alert('되니?')
+            let isExecuted = confirm("게시글을 삭제하시겠습니까?");
+            if (isExecuted) {
+                var formData = $("#form-delete").serialize();
+                    $.ajax({
+                    url: '/Notices/Delete/' + id,
+                        type: "GET",
+                        data: formData,
+                        success: function (data) {
+                            if (data.result == 0) {
+                               console.log('사실 안됐는데 눈속임')
+                            }
+                            else {
+                                console.log(data)
+                            alert('삭제성공')
+                            }
+                        },
+                    });
+            
+            }else{
+                alert('뭔가 기능이 아예 안됨');
+                }
+            }
         $(document).ready(function () {
             var controll = false;
             $(".editBtn").click(function () {
@@ -29,11 +54,14 @@
                     $(".modal").hide();
                 }
             });
-            $("#cancel").click(function () {
-                $("#firstPage").show();
-                $('#cancel').hide();
-                $(".modal").hide();
-            });
+        });
+
+        $(document).ready(function () {
+            if (@Model.fileAttachMent == null) {
+                $('#downloadZone').hide();
+            } else {
+                $('#downloadZone').show();
+            }
         });
     </script>
 }
@@ -67,10 +95,37 @@
         </dt>
         <dd class="col-sm-10">
             @Html.DisplayFor(@Model => @Model.UpdateDate)
-        </dd>
+        </div>       
+    </div>
+        @*파일 다운로드*@
+        <div id="downloadZone">
+            <h6>Download File</h6>
+            <a asp-action="FileDownload" asp-route-id="@Model?.Id">@Model.FileName File Download</a>
+        </div>
 
-    </dl>
-    <hr />
+    <div class="board-section">
+        <div style="padding:20px;">
+            @Html.DisplayFor(@Model => @Model.Content)
+            @*  <a href="@Url.Action("DownloadFile", "Notices", new { id = Model.Id })">Download file</a>*@
+        </div>
+        
+
+        <div style="display:flex; margin-top:20px;">
+            @*게시글 수정/삭제 버튼*@
+            <div style="margin-right:10px;">
+                <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">게시글 수정</a>
+            </div>
+            <div>
+                @*asp-route-id="@Model?.Id"*@
+                <form asp-action="Delete" id="form-delete">
+                    <input type="hidden" asp-for="Id" />
+                    <input type="submit" value="게시글 삭제" class="btn btn-danger"  /> 
+                    @*onclick="DeleteFunction('@Model?.Id')*@
+                </form>
+                @*<button class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')">게시글 삭제</button>*@
+            </div>
+        </div>
+        <hr />
 
     <table class="table">
         <thead>
@@ -89,22 +144,24 @@
         <tbody id="firstPage">
                 @foreach (var item in Model.Comments)
                 {
-                    <tr id ="pageContent">
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Comment)
-                        </td>
-
-                        <td>
-                            @Html.DisplayFor(modelItem => item.UserName)
-                        </td>
-                        <td>
-                        <button type="button" class="btn btn-primary editBtn" data-bs-toggle="modal" data-bs-target="#exampleModal" id="@item.Id" username="@item.UserName">
-                            Edit
-                        </button>
-                        <form asp-action="CommentDelete" method="post">
-                            <input type="hidden" name ="commentId" asp-for="@item.Id" />
-                            <hr>
-                            <input type="submit" value="Delete" class="btn btn-danger" /> 
+                <div class="userName-section">
+                  @Html.DisplayFor(modelItem => item.UserName) 님
+                </div>
+                  <div style="display:flex; justify-content:space-between; align-items: center; ">
+                    <div class="commentText-section">
+                        @Html.DisplayFor(modelItem => item.Comment)
+                    </div>
+                            <div style="display:flex; margin-top:20px; align-items: center;">
+                        @*게시글 수정 버튼*@
+                        <div style="margin-right:10px;">
+                            <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">수정</a>
+                        </div>
+                        <div>
+                            @*코멘트 삭제 *@
+                        <form asp-action="CommentDelete" method="post" >
+                            <input type="hidden" name="commentId" asp-for="@item.Id" />
+                                        <input type="hidden" name="Id" asp-for="@Model.Id" />
+                            <input type="submit" value="삭제" class="btn btn-outline-danger" />
                         </form>
                         </td>
                     </tr>

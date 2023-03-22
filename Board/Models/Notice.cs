@@ -19,6 +19,11 @@ namespace Board.Models
 
         public string? Category { get; set; }
 
+        public string? fileAttachMent { get; set; }
+
+        public string? FileName { get; set; }
+
+        public byte[]? fileContents { get; set; }
 
     }
 }
