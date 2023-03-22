@@ -11,6 +11,7 @@ namespace Board.Models
         public string UserName { get; set; }
 
         public string Comment { get; set; }
+        
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime UpdateTime { get; set; }
     }

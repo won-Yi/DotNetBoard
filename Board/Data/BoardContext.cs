@@ -16,8 +16,7 @@ namespace Board.Data
 
         public DbSet<Board.Models.Notice> Notice { get; set; } 
         public DbSet<Board.Models.Comments> Comments { get; set; }
-    
 
-
+        public DbSet<Board.Models.FileModel> FileModel { get; set; }
     }
 }

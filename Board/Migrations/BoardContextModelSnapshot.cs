@@ -49,6 +49,30 @@ namespace Board.Migrations
                     b.ToTable("Comments");
                 });
 
+            modelBuilder.Entity("Board.Models.FileModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("FileNames")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("FilePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("NoticeId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FileModel");
+                });
+
             modelBuilder.Entity("Board.Models.Notice", b =>
                 {
                     b.Property<int>("Id")
@@ -81,6 +105,12 @@ namespace Board.Migrations
 
                     b.Property<int>("Views_Number")
                         .HasColumnType("int");
+
+                    b.Property<string>("fileAttachMent")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("fileContents")
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("Id");
 
