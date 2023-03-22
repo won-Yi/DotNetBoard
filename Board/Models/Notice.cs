@@ -16,8 +16,8 @@ namespace Board.Models
 
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime UpdateDate { get; set; }
-
-        public string? Category { get; set; }
+        
+        public string Category { get; set; }
 
         public string? fileAttachMent { get; set; }
 
