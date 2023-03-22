@@ -3,7 +3,7 @@
 @{
     ViewData["Title"] = "Create";
 }
-
+<style>
 <h1>Create</h1>
 
     .form-select {
@@ -64,32 +64,39 @@
 <h1>@ViewBag.Category</h1>
 <h4>Notice</h4>
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <select asp-for="Category" name="Category">
+<div>
+    <div>
+        <form asp-action="Create" method="post" id="createForm" enctype="multipart/form-data">
+            @* asp-items="@ViewBag.Categories"*@
+            <select asp-for="Category" name="Category" class="form-select" style="width:200px;">
                 <option value="">All</option>
                 <option value="잡담">잡담</option>
+                <option value="유머">유머</option>
                 <option value="정보">정보</option>
-                <option value="무료나눔">무료나눔</option>
             </select>
+            <div class="form-group username" style="margin-bottom:20px; margin-top:20px; width:200px;">
+                <label asp-for="UserName" class="control-label">이름</label>
+                <input asp-for="UserName" class="form-control" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="form-group" id="title" style="margin-top:20px;">
                 <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control" />
+                <input asp-for="Title" class="form-control title" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
-            <div class="form-group">
+
+            <div class="content" style="margin-top:20px;">
                 <label asp-for="Content" class="control-label"></label>
                 <textarea asp-for="Content" class=" form-control"></textarea>
                 @* asp-for="Content"*@
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
-
             <div class="upload-container">
-                 <input type="file" name="files" id="file" multiple/>
+                <input type="file" name="files" id="file" multiple />
             </div>
-                @*<button type="button" class="btn btn-primary btn-block" onclick="javascript:fnSendFile();">Upload</button>*@
+            @*<button type="button" class="btn btn-primary btn-block" onclick="javascript:fnSendFile();">Upload</button>*@
+
             <div class="form-group" style="margin-bottom:20px;">
                 <input type="submit" value="게시글 작성" class="btn btn-secondary" onclick="fnSendFile()" />
             </div>
@@ -139,6 +146,12 @@
       
     </script>
 }
+
+
+
+
+
+
 @*  var createForm = document.getElementById("createForm");
         var _FormData = new FormData(createForm); // 서버 전송 폼 변수
         var _FILE_MAX_SIZE = 10;        // 업로드 파일 최대 사이즈
