@@ -1,4 +1,4 @@
-﻿
+
 @model Board.Controllers.NoticeDto
 
 @{
@@ -16,7 +16,6 @@
                         type: "POST",
                         //data: formData,
                         success: function (data) {
-                        window.location.href = "https://localhost:7295/Notices/Index/"
                         },
                     });
             }else{
@@ -24,48 +23,41 @@
                 }
             }
         
-       
+            
+            $(document).ready(function () {
+            var controll = false;
+            $(".editBtn").click(function () {
+                controll = !controll;
+                //댓글 개별 ID 받아오기 how? this.data('id')로?
+                var Id = $(this).attr('id');
+                var UserName = $(this).attr('username')
+                
+                console.log(Id, UserName)
+                if (controll) {
+                    $("#firstPage").hide();
+                    $(".modal").show();
+                    $('#cancel').show();
+                    $('#commentBody').append(`<input type="hidden" value="${Id}" name="Id"/>`);
+                    $('#commentBody').append(`<input type="hidden" value="${UserName}" name="UserName"/>`);
+                } else {
+                    $("#firstPage").show();
+                    $('#cancel').hide();
+                    $(".modal").hide();
+                }
+            });
+        });
+
         function fileCheck(filename){
             console.log(typeof filename)
             console.log(filename)
-            if (filename == "System.Collections.Generic.List`1[Board.Models.FileModel]") {
+                if (filename == "") {
                  alert('첨부된 파일이 없습니다.');
                 $('#downloadZone').hide();
             } else {
                 $('#downloadZone').show();
             }
         }
-
-        var comment_id = ""
-
-        function commentedit(id){
-            comment_id = id;
-        }
-
-        function CommentEdit() {
-            var UserName = $('#Username').val();
-            var editComment = $('#editComment').val();
-            $.ajax({
-                url: 'https://localhost:7295/Notices/CommentEdit/' + comment_id,
-                type: "POST",
-                data: {
-                    //"Id": comment_id,
-                    "UserName": UserName,
-                    "editComment": editComment,
-                },
- 
-                success: function (data) {
-                    location.reload();
-                },
-                error: function (request, textStatus, error) {
-                    console.log("code: " + request.status)
-                    console.log("message: " + request.responseText)
-                    console.log("error: " + error);
-                }
-                });
-            }
-
-
+            
     </script>
 }
 
@@ -87,16 +79,10 @@
     </div>
 
     @*파일다운로드*@
-   @* <input type="button" onclick="fileCheck('@Model.FileModel')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;" />*@
+    <input type="button" onclick="fileCheck('@Model.FileName')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;"/>
     <div id="downloadZone" style="display:none; margin-top:10px;">
-        @if (Model.FileModel.Count > 0)
-        {
-            @foreach (var item in Model.FileModel)
-            {
-                <h6>Download File</h6>
-                <a asp-action="FileDownload" asp-route-filename="@item.FileNames">@Html.DisplayFor(modelItem => item.FileNames) File Download</a>
-            }
-        }
+        <h6>Download File</h6>
+        <a asp-action="FileDownload" asp-route-id="@Model.Id">@Model.FileName File Download</a>
     </div>
     <div class="board-section">
         <div style="padding:20px;">
@@ -135,11 +121,8 @@
                             </div>
                             <div style="display:flex; margin-top:20px; align-items: center;">
                                 @*게시글 수정*@
-                                <div style="margin-right:10px;" >
-                                    @*asp-action ="commentEdit"*@
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="commentedit('@item.Id')">
-                                       수정
-                                    </button>
+                                <div style="margin-right:10px;">
+                                    <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">수정</a>
                                 </div>
                                 <div>
                                     <form asp-action="CommentDelete" method="post">
@@ -160,37 +143,27 @@
 
 
         <!-- Modal -->
+        <form asp-action="CommentEdit" method="post">
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h1 class="modal-title fs-5" id="exampleModalLabel">댓글 수정</h1>
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
-                        @*<div class="modal-body" id="commentBody">*@
-                         <div style="margin-left:10px;">
-                            <h6>이름</h6>
-                            @*value=@Model.UserName*@
-                            <input type="text" id="Username"/><br />
-                        </div>
-                            <br />
-                        <div style="margin-left:10px; margin-bottom:10px; width:100%;">
-                            <h6>댓글</h6>
-                            <input type="text" id="editComment"/>
-                        </div>
+                        <div class="modal-body" id="commentBody">
+                            <input type="text" name="editComment" />
                             @*model.id = notice id, username도 notice username일걸?*@
-                            @*<input type="hidden" asp-for-id="@Model.Id" />*@
-
-                        
-                        @*</div>*@
+                            <input type="hidden" asp-for="@Model.Id" />
+                        </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                        <input type="button" class="btn btn-primary" id="saveBtn" onclick="CommentEdit()" value="댓글수정" />
+                            <button type="submit" class="btn btn-primary" id="saveBtn">Save changes</button>
                         </div>
                     </div>
                 </div>
             </div>
-        
+        </form>
         @*</div>*@
 
         </table>
