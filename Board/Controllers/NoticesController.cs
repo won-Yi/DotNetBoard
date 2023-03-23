@@ -128,12 +128,10 @@ namespace Board.Controllers
                 Title = notice.Title,
                 UpdateDate = notice.UpdateDate,
                 Views_Number = notice.Views_Number,
-               
                 FileModel = filemodel.ToList(),
                 Comments = comment.ToList(),
                 FileName = notice.FileName,
             };
-            
 
             if (notice_dto == null)
             {
@@ -145,14 +143,14 @@ namespace Board.Controllers
 
 
         //파일 다운로드
-        public FileResult FileDownload(int? Id) {
+        public FileResult FileDownload(string? filename) {
 
-            Notice notice = new Notice();
-            notice = _context.Notice.FirstOrDefault(m => m.Id == Id);
+            FileModel fileModel = new FileModel();
+            fileModel = _context.FileModel.FirstOrDefault(m => m.FileNames == filename);
 
 
-            string filepath = notice.fileAttachMent;        // 파일 경로
-            string filename = notice.FileName;                 // 파일명
+            string filepath = fileModel.FilePath;        // 파일 경로
+            string filenames = fileModel.FileNames;                 // 파일명
             string path = filepath;          // 파일 경로 / 파일명
                 //+ "/" + filename;
             
@@ -160,7 +158,7 @@ namespace Board.Controllers
                 // 파일을 바이트 형식으로 읽음
             byte[] bytes = System.IO.File.ReadAllBytes(path);
             // 파일 다운로드 처리
-            return File(bytes, "application/octet-stream", filename);
+            return File(bytes, "application/octet-stream", filenames);
         }
 
 
@@ -182,61 +180,10 @@ namespace Board.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(List<IFormFile> files, [Bind("Id", "Title", "Content", "UserName", "Category")] Notice notice)
         {
+
+            
             int result = -1;
 
-            string uploadDir = "D:/code/Board/UploadPath/";
-            try
-            {
-                // 업로드 폴더 경로 존재 확인
-                DirectoryInfo di = new DirectoryInfo(uploadDir);
-                // 폴더가 없을 경우 신규 작성
-                if (di.Exists == false) di.Create();
-
-                // 선택한 파일 개수만큼 반복
-                foreach (var formFile in files)
-                {
-                    if (formFile.Length > 0)
-                    {
-                        var fileFullPath = uploadDir + formFile.FileName;
-
-                        // 파일명이 이미 존재하는 경우 파일명 변경
-                        int filecnt = 1;
-                        System.String newFilename = string.Empty;
-                        while (new FileInfo(fileFullPath).Exists)
-                        {
-                            var idx = formFile.FileName.LastIndexOf('.');
-                            var tmp = formFile.FileName.Substring(0, idx);
-                            newFilename = tmp + System.String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
-                            fileFullPath = uploadDir + newFilename;
-                        }
-
-                        FileModel model = new FileModel();
-                        
-                        model.FilePath = fileFullPath;
-                        model.NoticeId = notice.Id;
-
-                        _context.Add(model);
-                        await _context.SaveChangesAsync();
-                        
-
-                        //notice.fileAttachMent = fileFullPath;
-                        //notice.FileName = formFile.FileName;
-
-
-                        // 파일 업로드
-                        using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
-                        {
-                            await formFile.CopyToAsync(stream);
-                        }
-                    }
-                }
-                result = 0;
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-            //Notice notice = new Notice();
 
             if (ModelState.IsValid)
             {
@@ -245,11 +192,67 @@ namespace Board.Controllers
                 DateTime time_now = DateTime.Now;
                 notice.UpdateDate = time_now;
 
-
                 _context.Add(notice);
                 await _context.SaveChangesAsync();
+
+                //notice.fileAttachMent = fileFullPath;
+                //notice.FileName = formFile.FileName;
+
+                string uploadDir = "D:/code/Board/UploadPath/";
+                try
+                {
+                    // 업로드 폴더 경로 존재 확인
+                    DirectoryInfo di = new DirectoryInfo(uploadDir);
+                    // 폴더가 없을 경우 신규 작성
+                    if (di.Exists == false) di.Create();
+
+                    // 선택한 파일 개수만큼 반복
+                    foreach (var formFile in files)
+                    {
+                        if (formFile.Length > 0)
+                        {
+                            var fileFullPath = uploadDir + formFile.FileName;
+
+                            // 파일명이 이미 존재하는 경우 파일명 변경
+                            int filecnt = 1;
+                            System.String newFilename = string.Empty;
+                            while (new FileInfo(fileFullPath).Exists)
+                            {
+                                var idx = formFile.FileName.LastIndexOf('.');
+                                var tmp = formFile.FileName.Substring(0, idx);
+                                newFilename = tmp + System.String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
+                                fileFullPath = uploadDir + newFilename;
+                            }
+
+                           
+
+                            FileModel model = new FileModel();
+
+                            model.NoticeId = notice.Id;
+                            model.FilePath = fileFullPath;
+                            model.FileNames = formFile.FileName;
+                            _context.Add(model);
+                            await _context.SaveChangesAsync();
+
+
+                            // 파일 업로드
+                            using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
+                            {
+                                await formFile.CopyToAsync(stream);
+                            }
+                        }
+                    }
+                    result = 0;
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                //Notice notice = new Notice();
                 return RedirectToAction(nameof(Index));
             }
+            
+
             return View(notice);
         }
 

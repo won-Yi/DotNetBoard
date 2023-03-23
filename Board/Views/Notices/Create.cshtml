@@ -69,6 +69,7 @@
 <div>
     <div>
         <form asp-action="Create" method="post" id="createForm" enctype="multipart/form-data">
+           @* <input type="hidden" asp-for="@Model.Id" />*@
             @* asp-items="@ViewBag.Categories"*@
             <select asp-for="Category" name="Category" class="form-select" style="width:200px;">
                 <option value="">All</option>
