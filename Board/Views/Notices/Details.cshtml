@@ -70,9 +70,9 @@
 }
 
 @*게시글 보는 곳*@
-<div class="whole-wrap">
+<div class="whole-wrap" style="margin:30px;">
 
-    <div class="titleSection">
+    <div class="titleSection" style="margin-bottom:20px;">
         @Html.DisplayFor(@Model => @Model.Category)
         <h4> @Html.DisplayFor(@Model => @Model.Title) </h4>
     </div>
@@ -87,12 +87,13 @@
     </div>
 
     @*파일다운로드*@
-    <div id="downloadZone" margin-top:10px;">
+    <div id="downloadZone" style="margin-top:30px;">
         @if (Model.FileModel != null && Model.FileModel.Count > 0)
         {
+            <h6>Download File</h6>
             @foreach (var item in Model.FileModel)
             {
-                <h6>Download File</h6>
+                <div></div>
                 <a asp-action="FileDownload" asp-route-filename="@item.FileNames">@Html.DisplayFor(modelItem => item.FileNames) File Download</a>
             }
         }
