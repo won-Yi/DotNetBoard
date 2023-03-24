@@ -41,6 +41,8 @@ namespace Board.Controllers
 
         public string UserName { get; set; }
 
+        public int? LikeNotice { get; set; }
+
         public DateTime UpdateDate { get; set; }
 
         public List<Comments> Comments { get; set; }
@@ -50,6 +52,16 @@ namespace Board.Controllers
 
         public string? FileName { get; set; }
         public string? fileAttachMent { get; set; }
+
+        public List<Notice>? Notices { get; set; }
+        public SelectList? Categorys { get; set; }
+
+        public string? SearchString { get; set; }
+
+        //string[]? 이렇게 하면 하나의 값만 가져온다
+        //Notice[]?로 해야 Notice의 객체는 게시물에 대한 정보를 담고 있으므로
+        //정보를 다 가져올 수 있다..
+        public Notice[]? BestNotice { get; set; }
 
     }
 
@@ -81,6 +93,16 @@ namespace Board.Controllers
             //var notice_list = Enumerable.Reverse(_context.Notice).ToList(); 전에는 Reverse를 사용했었다.
             notice = from m in _context.Notice orderby m.UpdateDate descending select m;
 
+            //take를 사용하면 값 몇개만 선택해서 가져오기 가능.
+            var notice_best = await _context.Notice
+                                    .Where(m => m.LikeNotice.HasValue)
+                                    .OrderByDescending(m => m.LikeNotice.Value)
+                                    .Take(3)
+                                    .ToArrayAsync();
+
+            //DTO에 notice_best를 넣기 위해 문자열로 변경하여 새로운 변수에 저장한다..?
+
+
 
             if (!string.IsNullOrEmpty(searchString)) {
 
@@ -98,11 +120,18 @@ namespace Board.Controllers
             var noticeCategory = new NoticeCategory
             {
                 Categorys = new SelectList(await categoryQuery.Distinct().ToListAsync()),
-                Notices = await notice.ToListAsync()
-                
+                Notices = await notice.ToListAsync(),
             };
-           
-            return View(noticeCategory);
+            //이걸 noticeDTO로 새롭게 만들어서 noticeCategory저거 자체를 DTO에 넣고 보낼 수 있을까?
+
+            var NoticeDto = new NoticeDto
+            {
+                Categorys = noticeCategory.Categorys,
+                Notices = noticeCategory.Notices,
+                BestNotice = notice_best,
+            };
+
+            return View(NoticeDto);
         }
 
         // GET: Notices/Details/5
@@ -140,6 +169,20 @@ namespace Board.Controllers
             }
 
             return View(notice_dto);
+        }
+
+
+        //게시글 좋아요
+        public async Task<IActionResult> Likes(int? Id)
+        {
+
+            Notice notice = new Notice();
+            notice =  await _context.Notice.FirstOrDefaultAsync(m => m.Id == Id);
+
+            notice.LikeNotice++;
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction("Details", "Notices", new { id = Id });
         }
 
 

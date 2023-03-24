@@ -1,4 +1,4 @@
-﻿@model Board.Models.NoticeCategory
+﻿@model Board.Controllers.NoticeDto
 
 
 @{
@@ -29,6 +29,9 @@
             numbers.innerHTML += `<li style="margin-left:10px;border-radius: 30px;"><a class="page-link" href=""> ${i} </a></li>`
         }
         const numbersBtn = numbers.querySelectorAll('a');
+        const best = document.querySelectorAll('#Best');
+        let bestArray = [...best]
+
         numbersBtn.forEach(function(item,idx){
             item.addEventListener('click', (e)=>{
                 e.preventDefault();
@@ -37,6 +40,17 @@
                 }
                 e.target.classList.add('active');
 
+                console.log(best)
+                if (idx == 0) {
+                    for (b of bestArray) {
+                        b.style.display = '';
+                    }
+                } else {
+                    for (b of bestArray) {
+                        b.style.display = 'none';
+                    }
+                }
+
                 //테이블을 출력해주는 함수
                displayRow(idx)
 
@@ -44,7 +58,7 @@
         });//
 
         function displayRow(idx){
-
+            
             let start = idx * rowPerPage;
             let end = start + rowPerPage; //0이면 10, 1이면 20,
 
@@ -54,16 +68,17 @@
             for (ra of rowsArray) {
                 ra.style.display='none';
             }
-
+                       
             let newRows = rowsArray.slice(start,end);
             for (nr of newRows){
                 nr.style.display = '';
             }//
+
+           
         }//displayRow
 
         //시작하자마자 실행되는 함수
         displayRow(0);
-        
 
 </script>
 }
@@ -89,6 +104,16 @@
         left: 50%;
         transform: translate(-50%, -50%);
     }
+
+    .BestNotice{
+        background-color: #EBF5FF;
+    }
+
+ 
+    .material-symbols-outlined {
+        font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48
+    }
+
 </style>
 @*
 asp-items="Model.Categorys"*@
@@ -142,6 +167,35 @@ asp-items="Model.Categorys"*@
             </tr>
         </thead>
         <tbody>
+            @foreach (var i in Model.BestNotice!)
+            {
+            <tr class="BestNotice" id="Best">
+                <td>
+                        @Html.DisplayFor(modelItem => i.Id)
+                        <span class="material-symbols-outlined" style="margin-left:20px;">
+                            favorite
+                        </span>
+                </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => i.Category)
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-id="@i.Id" style="text-decoration: none; color:black; ">
+                           @Html.DisplayFor(modelItem => i.Title)
+                        </a>
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => i.UserName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => i.UpdateDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => i.Views_Number)
+                    </td>
+            </tr>
+            }
+           
             @foreach (var item in Model.Notices!)
             {
                 <tr id="trs">

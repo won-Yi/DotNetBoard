@@ -24,7 +24,6 @@ namespace Board.Models
         public string? FileName { get; set; }
 
         public byte[]? fileContents { get; set; }
-
-
+        public int? LikeNotice { get; set; }
     }
 }
