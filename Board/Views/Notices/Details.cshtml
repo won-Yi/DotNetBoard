@@ -88,8 +88,8 @@
 
     @*파일다운로드*@
    @* <input type="button" onclick="fileCheck('@Model.FileModel')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;" />*@
-    <div id="downloadZone" style="display:none; margin-top:10px;">
-        @if (Model.FileModel.Count > 0)
+    <div id="downloadZone" margin-top:10px;">
+        @if (Model.FileModel != null && Model.FileModel.Count > 0)
         {
             @foreach (var item in Model.FileModel)
             {

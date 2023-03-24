@@ -134,7 +134,7 @@ namespace Board.Controllers
                 Comments = comment.ToList(),
                 FileName = notice.FileName,
             };
-
+            
             if (notice_dto == null)
             {
                 return NotFound();
