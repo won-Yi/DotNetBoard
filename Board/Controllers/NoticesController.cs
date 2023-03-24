@@ -71,7 +71,7 @@ namespace Board.Controllers
         public async Task<IActionResult> Index(string? Category, string? searchString)
         {
 
-            //LINQ to get list of category
+           //LINQ 
             IQueryable<string> categoryQuery = from m in _context.Notice
                                                orderby m.UpdateDate descending
                                                select m.Category;
@@ -373,24 +373,6 @@ namespace Board.Controllers
             return View(notice);
         }
 
-        // GET: Notices/Delete/5
-        //public async Task<IActionResult> Delete(int? id)
-        //{
-        //    if (id == null || _context.Notice == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    var notice = await _context.Notice
-        //        .FirstOrDefaultAsync(m => m.Id == id);
-        //    if (notice == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    return View(notice);
-        //}
-
         // POST: Notices/Delete/5
         //ActionName("DeleteConfirmed")
         [HttpPost]
@@ -453,9 +435,6 @@ namespace Board.Controllers
         
         public async Task<IActionResult> CommentEdit(int Id, string UserName, string editComment )
         {
-
-            //comment _context.Comment해서 특정모델 불러봐야 가능할듯?
-            //Comments comments = new Comments();
             var comment = _context.Comments.FirstOrDefault(c => c.Id == Id);
 
             comment.UserName = (string)UserName;
@@ -519,5 +498,5 @@ namespace Board.Controllers
         {
           return (_context.Notice?.Any(e => e.Id == id)).GetValueOrDefault();
         }
-    }//
-}//
+    }
+}
