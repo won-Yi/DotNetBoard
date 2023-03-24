@@ -15,7 +15,7 @@
         }
     
 
-        const rowPerPage = 10; //페이지당 몇개를 보여줄지
+        const rowPerPage = 15; //페이지당 몇개를 보여줄지
         const rows = document.querySelectorAll('#trs');
         const rowsCount = '@Model.Notices.Count'
         const PageCount = Math.ceil(rowsCount/rowPerPage);
@@ -72,10 +72,10 @@
     #numbers li a.active{
        
     }
-
     .paginationwrap {
         width: 100%;
         height:80px;
+        margin-top:50px;
         
         position: relative;
     }
@@ -118,8 +118,8 @@ asp-items="Model.Categorys"*@
 
 <div>
     <span id="displayCount"></span>
-        <table class="table table-striped table-hover">
-        <thead id="theadalways">
+        <table class="table table-striped table-hover" style="margin-top:30px;">
+        <thead id="theadalways" style="background-color:#505050; color:white;">
             <tr>
                 <th>
                     @Html.DisplayNameFor(model => model.Notices![0].Id)
@@ -152,7 +152,7 @@ asp-items="Model.Categorys"*@
                         @Html.DisplayFor(modelItem => item.Category)
                     </td>
                     <td>
-                        <a asp-action="Details" asp-route-id="@item.Id">@Html.DisplayFor(modelItem => item.Title)</a>
+                        <a asp-action="Details" asp-route-id="@item.Id" style="text-decoration: none; color:black; ">@Html.DisplayFor(modelItem => item.Title)</a>
                     </td>
                     <td>
                         @Html.DisplayFor(modelItem => item.UserName)
