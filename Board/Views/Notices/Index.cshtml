@@ -80,6 +80,28 @@
         //시작하자마자 실행되는 함수
         displayRow(0);
 
+        ids = []
+        //checkbox
+        function checkDelete(id){
+            //여러개 체크 되면 값을 list에 묶어서 보내야 한다.
+            ids.push(id)
+            console.log(ids);
+        }//
+
+        function BulkDelete(){
+            $.ajax({
+                url: 'https://localhost:7295/Notices/BulkDelete',
+                type: 'POST',
+                data: { 'ids': ids },
+                success: function (result) {
+                    location.reload();
+                },
+                error: function (error) {
+                    alert(error)
+                }
+            });
+        }
+
 </script>
 }
 
@@ -147,6 +169,9 @@ asp-items="Model.Categorys"*@
         <thead id="theadalways" style="background-color:#505050; color:white;">
             <tr>
                 <th>
+                    
+                </th>
+                <th>
                     @Html.DisplayNameFor(model => model.Notices![0].Id)
                 </th>
                 <th>
@@ -171,10 +196,12 @@ asp-items="Model.Categorys"*@
             {
             <tr class="BestNotice" id="Best">
                 <td>
+                    <span class="material-symbols-outlined" style="margin-left:20px;">
+                        favorite
+                    </span>
+                </td>
+                <td>
                         @Html.DisplayFor(modelItem => i.Id)
-                        <span class="material-symbols-outlined" style="margin-left:20px;">
-                            favorite
-                        </span>
                 </td>
                     <td>
                         @Html.DisplayFor(modelItem => i.Category)
@@ -200,6 +227,14 @@ asp-items="Model.Categorys"*@
             {
                 <tr id="trs">
                     <td>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" value=""
+                                   id="flexCheckDefault" style="border:solid gray;" onclick="if(this.checked){ checkDelete('@item.Id'); }">
+                            <label class="form-check-label" for="flexCheckDefault">
+                            </label>
+                        </div>
+                    </td>
+                    <td>
                         @Html.DisplayFor(modelItem => item.Id)
                     </td>
                     <td>
@@ -222,6 +257,16 @@ asp-items="Model.Categorys"*@
             }
     </table>
 </div>
+<div style="display:flex; justify-content:space-between">
+   
+    <div>
+        <button class="btn btn-outline-success" onclick="BulkDelete()">삭제</button>
+    </div>
+    <p>
+        <a asp-action="Create"><button type="button" class="btn btn-outline-secondary">글쓰기</button></a>
+    </p>
+</div>
+
 <div class="paginationwrap">
     <div class="pagination">
         <!-- pagination -->
@@ -230,7 +275,4 @@ asp-items="Model.Categorys"*@
     </div>
 </div>
 
-<p>
-    <a asp-action="Create"><button type="button" class="btn btn-outline-secondary">글쓰기</button></a>
-</p>
 

@@ -421,6 +421,22 @@ namespace Board.Controllers
         }
 
 
+        //Bulk Delete
+        [HttpPost]
+        public async Task<IActionResult> BulkDelete(List<string>? ids) {
+            
+            Notice notice = new Notice();          
+            foreach(var id in ids) { 
+                var Id = int.Parse(id);
+                var content = await _context.Notice.FindAsync(Id);
+                _context.Notice.Remove(content);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+
         [HttpPost, ActionName("CommentCreate")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CommentCreate(int? id, string? Username, string? Comment)
