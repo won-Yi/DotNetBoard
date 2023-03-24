@@ -103,13 +103,19 @@
             @Html.DisplayFor(@Model => @Model.Content)
         </div>
 
-        <div style="display:flex; margin-top:20px;">
+        <div style="display:flex; margin-top:20px; justify-content:space-between;">
             @*게시글 수정/삭제 버튼*@
-            <div style="margin-right:10px;">
-                <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">게시글 수정</a>
+            <div style="display:flex; ">
+                <div style="margin-right:10px;">
+                    <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">게시글 수정</a>
+                </div>
+                <div>
+                        <input type="button" class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')" value="게시글 삭제"></input>
+                </div>
             </div>
-            <div>
-                    <input type="button" class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')" value="게시글 삭제"></input>
+             @*좋아요*@
+             <div>
+                <a asp-action="Likes" asp-route-Id="@Model.Id" class="btn btn-outline-primary">좋아요</a>
             </div>
         </div>
         <hr />
@@ -129,19 +135,20 @@
                                 @Html.DisplayFor(modelItem => item.Comment)
                             </div>
                             <div style="display:flex; margin-top:20px; align-items: center;">
-                                @*게시글 수정*@
-                                <div style="margin-right:10px;" >
-                                    @*asp-action ="commentEdit"*@
-                                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="commentedit('@item.Id')">
-                                       수정
-                                    </button>
-                                </div>
-                                <div>
-                                    <form asp-action="CommentDelete" method="post">
-                                        <input type="hidden" name="commentId" asp-for="@item.Id" />
-                                        <input type="hidden" name="Id" asp-for="@Model.Id" />
-                                        <input type="submit" value="Delete" class="btn btn-outline-danger" />
-                                    </form>
+                                @*댓글 수정*@
+                                
+                                    <div style="margin-right:10px;" >
+                                        @*asp-action ="commentEdit"*@
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" onclick="commentedit('@item.Id')">
+                                           수정
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <form asp-action="CommentDelete" method="post">
+                                            <input type="hidden" name="commentId" asp-for="@item.Id" />
+                                            <input type="hidden" name="Id" asp-for="@Model.Id" />
+                                            <input type="submit" value="삭제" class="btn btn-outline-danger" />
+                                        </form>
                                 </div>
                             </div>
                         </div>
