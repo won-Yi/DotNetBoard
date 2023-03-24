@@ -77,7 +77,10 @@ namespace Board.Controllers
                                                select m.Category;
 
             var notice = from m in _context.Notice select m;
+            //게시글 역순으로 불러오기 위한 orderby m.UpdateDate descending 추가
+            //var notice_list = Enumerable.Reverse(_context.Notice).ToList(); 전에는 Reverse를 사용했었다.
             notice = from m in _context.Notice orderby m.UpdateDate descending select m;
+
 
             if (!string.IsNullOrEmpty(searchString)) {
 
@@ -91,6 +94,7 @@ namespace Board.Controllers
               
             }
 
+            //이 부분은 아직 이해를 잘 하지 못함.
             var noticeCategory = new NoticeCategory
             {
                 Categorys = new SelectList(await categoryQuery.Distinct().ToListAsync()),
@@ -98,8 +102,6 @@ namespace Board.Controllers
                 
             };
            
-            //var notice_list = Enumerable.Reverse(_context.Notice).ToList();
-
             return View(noticeCategory);
         }
 
@@ -116,8 +118,6 @@ namespace Board.Controllers
                 notice.Views_Number++;
                 await _context.SaveChangesAsync();
             
-
-
             var comment = from m in _context.Comments where m.Notice_id == id select m;
 
             var filemodel = from m in _context.FileModel where m.NoticeId == id select m;
@@ -132,7 +132,6 @@ namespace Board.Controllers
                 Views_Number = notice.Views_Number,
                 FileModel = filemodel.ToList(),
                 Comments = comment.ToList(),
-                FileName = notice.FileName,
             };
             
             if (notice_dto == null)
@@ -152,12 +151,12 @@ namespace Board.Controllers
 
 
             string filepath = fileModel.FilePath;        // 파일 경로
-            string filenames = fileModel.FileNames;                 // 파일명
-            string path = filepath;          // 파일 경로 / 파일명
-                //+ "/" + filename;
+            string filenames = fileModel.FileNames;      // 파일명
+            string path = filepath;  // 파일 경로 / 파일명
+               
             
                 
-                // 파일을 바이트 형식으로 읽음
+            // 파일을 바이트 형식으로 읽음
             byte[] bytes = System.IO.File.ReadAllBytes(path);
             // 파일 다운로드 처리
             return File(bytes, "application/octet-stream", filenames);
@@ -186,16 +185,12 @@ namespace Board.Controllers
 
             if (ModelState.IsValid)
             {
-                //notice.fileAttachment = fileFullPath;
                 //현재 시간을 데이터 베이스에 넣어준다.
                 DateTime time_now = DateTime.Now;
                 notice.UpdateDate = time_now;
 
                 _context.Add(notice);
                 await _context.SaveChangesAsync();
-
-                //notice.fileAttachMent = fileFullPath;
-                //notice.FileName = formFile.FileName;
 
                 string uploadDir = "D:/code/Board/UploadPath/";
                 try
@@ -233,7 +228,6 @@ namespace Board.Controllers
                             _context.Add(model);
                             await _context.SaveChangesAsync();
 
-
                             // 파일 업로드
                             using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
                             {
@@ -258,8 +252,6 @@ namespace Board.Controllers
         // GET: Notices/Edit/5
         public async Task<IActionResult> Edit(int? id)
     {
-
-
         if (id == null || _context.Notice == null)
         {
             return NotFound();
@@ -267,8 +259,6 @@ namespace Board.Controllers
         Notice notice = new Notice();           
         notice = _context.Notice.FirstOrDefault(x => x.Id == id);
             
-           
-
         if (notice == null)
         {
             return NotFound();
@@ -291,12 +281,9 @@ namespace Board.Controllers
             var fileModels = _context.FileModel.Where(x => x.NoticeId == notice.Id).ToList();
             if (files != null && files.Count > 0)
             {
-                                    // 파일 모델을 참조하고 있는 다른 모델이 없으면 삭제 진행
-                    //removeRange를 사용하지 않고 for문을 통해 지우는 방법을 써보기
                     _context.FileModel.RemoveRange(fileModels);
                     await _context.SaveChangesAsync();
                     result = 1;
-              
             }
 
             string uploadDir = "D:/code/Board/UploadPath/";
@@ -391,12 +378,10 @@ namespace Board.Controllers
         }
 
 
-
         [HttpPost, ActionName("CommentCreate")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CommentCreate(int? id, string? Username, string? Comment)
         {
-
 
             if (ModelState.IsValid)
             {
@@ -421,18 +406,15 @@ namespace Board.Controllers
                 comments.UpdateTime = time_now;
                 Debug.WriteLine(comments);
 
-
                 _context.Add(comments);
                 await _context.SaveChangesAsync();
                 Response.Redirect("Details/" + id);
             }
 
-            Debug.WriteLine("여기가 실행되는거지?");
             return View();
         }
 
         [HttpPost]
-        
         public async Task<IActionResult> CommentEdit(int Id, string UserName, string editComment )
         {
             var comment = _context.Comments.FirstOrDefault(c => c.Id == Id);

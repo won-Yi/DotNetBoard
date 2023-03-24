@@ -87,7 +87,6 @@
     </div>
 
     @*파일다운로드*@
-   @* <input type="button" onclick="fileCheck('@Model.FileModel')" value="파일체크" class="btn btn-secondary" style="margin-top:20px;" />*@
     <div id="downloadZone" margin-top:10px;">
         @if (Model.FileModel != null && Model.FileModel.Count > 0)
         {
@@ -101,7 +100,6 @@
     <div class="board-section">
         <div style="padding:20px;">
             @Html.DisplayFor(@Model => @Model.Content)
-            @*  <a href="@Url.Action("DownloadFile", "Notices", new { id = Model.Id })">Download file</a>*@
         </div>
 
         <div style="display:flex; margin-top:20px;">
@@ -110,11 +108,7 @@
                 <a asp-action="Edit" class="btn btn-outline-dark" asp-route-id="@Model?.Id">게시글 수정</a>
             </div>
             <div>
-                @*<form action="Delete" id="form-delete" method="post">*@
-                    @*<input type="hidden" asp-for="Id" />*@
-                    @*asp-route-id="@Model?.Id"*@
                     <input type="button" class="btn btn-outline-danger" onclick="DeleteFunction('@Model?.Id')" value="게시글 삭제"></input>
-                @*</form>*@
             </div>
         </div>
         <hr />
@@ -153,12 +147,7 @@
                     }
                 </tbody>
         </div>
-        @*<td>
-        <button id="cancel">댓글수정 취소</button>
-        </td>*@
-        @*  <div id="secondContent">*@
-
-
+       
         <!-- Modal -->
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -178,11 +167,7 @@
                             <h6>댓글</h6>
                             <input type="text" id="editComment"/>
                         </div>
-                            @*model.id = notice id, username도 notice username일걸?*@
-                            @*<input type="hidden" asp-for-id="@Model.Id" />*@
 
-                        
-                        @*</div>*@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <input type="button" class="btn btn-primary" id="saveBtn" onclick="CommentEdit()" value="댓글수정" />
@@ -194,13 +179,6 @@
         @*</div>*@
 
         </table>
-
-
-        @* comment Post 나올때 쓸 from tag*@
-        @* <form asp-action="CommentEdit" method="post">
-        <input type="hidden" asp-for="Id" />
-        <button type="submit">Register</button>
-        </form>*@
 
         @*코멘트 작성 부분*@
         <div>
