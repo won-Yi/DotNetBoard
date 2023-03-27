@@ -184,6 +184,10 @@ namespace Board.Controllers
                 notice.LikeNotice = 0;
             }
 
+            if (notice.LikeNotice == null) {
+                notice.LikeNotice = 0;
+            }
+
             notice.LikeNotice++;
             await _context.SaveChangesAsync();
 
@@ -389,6 +393,7 @@ namespace Board.Controllers
 
                     DateTime time_now = DateTime.Now;
                     notice.UpdateDate = time_now;
+                    
 
 
                     _context.Update(notice);
