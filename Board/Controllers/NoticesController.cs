@@ -62,7 +62,6 @@ namespace Board.Controllers
         //Notice[]?로 해야 Notice의 객체는 게시물에 대한 정보를 담고 있으므로
         //정보를 다 가져올 수 있다..
         public Notice[]? BestNotice { get; set; }
-
     }
 
 
@@ -179,6 +178,10 @@ namespace Board.Controllers
             Notice notice = new Notice();
             notice =  await _context.Notice.FirstOrDefaultAsync(m => m.Id == Id);
 
+            if (notice.LikeNotice == null) {
+                notice.LikeNotice = 0;
+            }
+
             notice.LikeNotice++;
             await _context.SaveChangesAsync();
 
@@ -261,8 +264,6 @@ namespace Board.Controllers
                                 fileFullPath = uploadDir + newFilename;
                             }
 
-                           
-
                             FileModel model = new FileModel();
 
                             model.NoticeId = notice.Id;
@@ -312,7 +313,7 @@ namespace Board.Controllers
         // POST: Notices/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, List<IFormFile> files, [Bind("Id,Title,Content,UserName,Category")] Notice notice)
+        public async Task<IActionResult> Edit(int id, List<IFormFile> files, [Bind("Id,Title,Content,UserName,Category,LikeNotice")] Notice notice)
         {
 
             int result = -1;
@@ -381,8 +382,10 @@ namespace Board.Controllers
             {
                 try
                 {
+                  
                     DateTime time_now = DateTime.Now;
                     notice.UpdateDate = time_now;
+                    
 
                     _context.Update(notice);
                     await _context.SaveChangesAsync();
