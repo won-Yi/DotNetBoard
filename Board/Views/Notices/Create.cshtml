@@ -68,6 +68,7 @@
 <hr />
 <div>
     <div>
+       
         <form asp-action="Create" method="post" id="createForm" enctype="multipart/form-data">
             <select asp-for="Category" name="Category" class="form-select" style="width:200px;">
                 <option value="">All</option>
@@ -89,7 +90,7 @@
 
             <div class="content" style="margin-top:20px;">
                 <label asp-for="Content" class="control-label"></label>
-                <textarea asp-for="Content" class=" form-control"></textarea>
+                <textarea asp-for="Content" class=" form-control" ></textarea>
                 @* asp-for="Content"*@
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
@@ -110,7 +111,6 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script>
-
 
         function fnSendFile() {
 
