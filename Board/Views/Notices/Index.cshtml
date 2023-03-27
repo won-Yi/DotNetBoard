@@ -14,14 +14,20 @@
             window.location.href = "/Notices/Index/?Category=" + selected;
         }
     
-        const rowPerPage = 15; //페이지당 몇개를 보여줄지
+
+        const rowPerPage = 10; //페이지당 몇개를 보여줄지
+
+
         const rows = document.querySelectorAll('#trs');
         const rowsCount = '@Model.Notices.Count'
         const PageCount = Math.ceil(rowsCount/rowPerPage);
         const numbers = document.querySelector('#numbers');
         let idx ;
 
-        console.log(rows)
+        let start;
+        let end;
+
+        
 
         //페이지네이션 생성
         for (let i = 1 ; i <= PageCount; i++) {
@@ -58,8 +64,8 @@
 
         function displayRow(idx){
             
-            let start = idx * rowPerPage;
-            let end = start + rowPerPage; //0이면 10, 1이면 20,
+            start = idx * rowPerPage;
+            end = start + rowPerPage; //0이면 10, 1이면 20,
 
             //[...row]이것도 Array.from(rows)와 같은 의미
             let rowsArray = Array.from(rows);
@@ -80,12 +86,25 @@
         displayRow(0);
 
         ids = []
+ 
         //checkbox
         function checkDelete(id){
-            //여러개 체크 되면 값을 list에 묶어서 보내야 한다.
-            ids.push(id)
-            console.log(ids);
-        }//
+            console.log(id)
+            const chbox = document.getElementById(id)
+            const is_checked = chbox.checked;
+
+            if (is_checked) {
+                ids.push(id);
+            }else{
+                if (ids.includes(id)) {
+                    ids.splice(ids.indexOf(id), 1);
+                }
+            }
+
+            console.log('ids:', ids)
+
+            }//
+
 
         function BulkDelete(){
             $.ajax({
@@ -100,6 +119,25 @@
                 }
             });
         }
+
+        //전체체크 클릭 시
+        function checkAll() {
+            ids = [] //전체 클릭시 일단 배열 싹 비워
+
+
+            let rowsArray = Array.from(rows);
+            let newRows = rowsArray.slice(start, end);
+
+            var cboxes = document.getElementsByName("cbox");
+
+            for (var i = 0; i < newRows.length; i++) {
+                    cboxes[i].checked = document.getElementById("checkall").checked;
+                    console.log(cboxes[i].id)
+                    ids.push(cboxes[i].id)
+                }
+
+            console.log(ids);
+            }//
 
 </script>
 }
@@ -168,7 +206,7 @@ asp-items="Model.Categorys"*@
         <thead id="theadalways" style="background-color:#505050; color:white;">
             <tr>
                 <th>
-                    
+                    <input type="checkbox" id="checkall" onclick="checkAll()" />
                 </th>
                 <th>
                     @Html.DisplayNameFor(model => model.Notices![0].Id)
@@ -228,7 +266,10 @@ asp-items="Model.Categorys"*@
                     <td>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value=""
-                                   id="flexCheckDefault" style="border:solid gray;" onclick="if(this.checked){ checkDelete('@item.Id'); }">
+                                   name ="cbox" id="@item.Id" style="border:solid gray;"
+                                   onclick="checkDelete('@item.Id')"
+                                    />
+                            @*onclick="if(this.checked){ checkDelete('@item.Id'); }"*@
                             <label class="form-check-label" for="flexCheckDefault">
                             </label>
                         </div>
