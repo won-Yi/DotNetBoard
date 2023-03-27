@@ -62,7 +62,6 @@ namespace Board.Controllers
         //Notice[]?로 해야 Notice의 객체는 게시물에 대한 정보를 담고 있으므로
         //정보를 다 가져올 수 있다..
         public Notice[]? BestNotice { get; set; }
-
     }
 
 
@@ -83,7 +82,7 @@ namespace Board.Controllers
         public async Task<IActionResult> Index(string? Category, string? searchString)
         {
 
-           //LINQ 
+            //LINQ 
             IQueryable<string> categoryQuery = from m in _context.Notice
                                                orderby m.UpdateDate descending
                                                select m.Category;
@@ -104,16 +103,17 @@ namespace Board.Controllers
 
 
 
-            if (!string.IsNullOrEmpty(searchString)) {
+            if (!string.IsNullOrEmpty(searchString))
+            {
 
-                notice = notice.Where(x => x.Title!.Contains(searchString)); 
+                notice = notice.Where(x => x.Title!.Contains(searchString));
             }
 
             if (!string.IsNullOrEmpty(Category))
             {
-               
+
                 notice = notice.Where(x => x.Category == Category);
-              
+
             }
 
             //이 부분은 아직 이해를 잘 하지 못함.
@@ -142,11 +142,11 @@ namespace Board.Controllers
             {
                 return NotFound();
             }
-                notice = await _context.Notice.FirstOrDefaultAsync(m => m.Id == id);
-                //조회수 추가
-                notice.Views_Number++;
-                await _context.SaveChangesAsync();
-            
+            notice = await _context.Notice.FirstOrDefaultAsync(m => m.Id == id);
+            //조회수 추가
+            notice.Views_Number++;
+            await _context.SaveChangesAsync();
+
             var comment = from m in _context.Comments where m.Notice_id == id select m;
 
             var filemodel = from m in _context.FileModel where m.NoticeId == id select m;
@@ -162,7 +162,7 @@ namespace Board.Controllers
                 FileModel = filemodel.ToList(),
                 Comments = comment.ToList(),
             };
-            
+
             if (notice_dto == null)
             {
                 return NotFound();
@@ -177,7 +177,12 @@ namespace Board.Controllers
         {
 
             Notice notice = new Notice();
-            notice =  await _context.Notice.FirstOrDefaultAsync(m => m.Id == Id);
+            notice = await _context.Notice.FirstOrDefaultAsync(m => m.Id == Id);
+
+            if (notice.LikeNotice == null)
+            {
+                notice.LikeNotice = 0;
+            }
 
             notice.LikeNotice++;
             await _context.SaveChangesAsync();
@@ -187,7 +192,8 @@ namespace Board.Controllers
 
 
         //파일 다운로드
-        public FileResult FileDownload(string? filename) {
+        public FileResult FileDownload(string? filename)
+        {
 
             FileModel fileModel = new FileModel();
             fileModel = _context.FileModel.FirstOrDefault(m => m.FileNames == filename);
@@ -196,9 +202,9 @@ namespace Board.Controllers
             string filepath = fileModel.FilePath;        // 파일 경로
             string filenames = fileModel.FileNames;      // 파일명
             string path = filepath;  // 파일 경로 / 파일명
-               
-            
-                
+
+
+
             // 파일을 바이트 형식으로 읽음
             byte[] bytes = System.IO.File.ReadAllBytes(path);
             // 파일 다운로드 처리
@@ -208,8 +214,9 @@ namespace Board.Controllers
 
 
         // GET: Notices/Create
-        public IActionResult Create() {
-           
+        public IActionResult Create()
+        {
+
             IQueryable<string> categoryQuery = from m in _context.Notice
                                                select m.Category;
 
@@ -217,7 +224,7 @@ namespace Board.Controllers
             ViewBag.Categories = Categorys;
 
             return View();
-        
+
         }
 
         [HttpPost]
@@ -261,8 +268,6 @@ namespace Board.Controllers
                                 fileFullPath = uploadDir + newFilename;
                             }
 
-                           
-
                             FileModel model = new FileModel();
 
                             model.NoticeId = notice.Id;
@@ -287,32 +292,32 @@ namespace Board.Controllers
                 //Notice notice = new Notice();
                 return RedirectToAction(nameof(Index));
             }
-            
+
 
             return View(notice);
         }
 
         // GET: Notices/Edit/5
         public async Task<IActionResult> Edit(int? id)
-    {
-        if (id == null || _context.Notice == null)
         {
-            return NotFound();
+            if (id == null || _context.Notice == null)
+            {
+                return NotFound();
+            }
+            Notice notice = new Notice();
+            notice = _context.Notice.FirstOrDefault(x => x.Id == id);
+
+            if (notice == null)
+            {
+                return NotFound();
+            }
+            return View(notice);
         }
-        Notice notice = new Notice();           
-        notice = _context.Notice.FirstOrDefault(x => x.Id == id);
-            
-        if (notice == null)
-        {
-            return NotFound();
-        }
-        return View(notice);
-    }
 
         // POST: Notices/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, List<IFormFile> files, [Bind("Id,Title,Content,UserName,Category")] Notice notice)
+        public async Task<IActionResult> Edit(int id, List<IFormFile> files, [Bind("Id,Title,Content,UserName,Category,LikeNotice")] Notice notice)
         {
 
             int result = -1;
@@ -324,9 +329,9 @@ namespace Board.Controllers
             var fileModels = _context.FileModel.Where(x => x.NoticeId == notice.Id).ToList();
             if (files != null && files.Count > 0)
             {
-                    _context.FileModel.RemoveRange(fileModels);
-                    await _context.SaveChangesAsync();
-                    result = 1;
+                _context.FileModel.RemoveRange(fileModels);
+                await _context.SaveChangesAsync();
+                result = 1;
             }
 
             string uploadDir = "D:/code/Board/UploadPath/";
@@ -381,8 +386,10 @@ namespace Board.Controllers
             {
                 try
                 {
+
                     DateTime time_now = DateTime.Now;
                     notice.UpdateDate = time_now;
+
 
                     _context.Update(notice);
                     await _context.SaveChangesAsync();
@@ -414,25 +421,9 @@ namespace Board.Controllers
                 return Problem("Entity set 'BoardContext.Notice' is null.");
             }
             var notice = await _context.Notice.FindAsync(id);
-           
+
             _context.Notice.Remove(notice);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
-
-        //Bulk Delete
-        [HttpPost]
-        public async Task<IActionResult> BulkDelete(List<string>? ids) {
-            
-            Notice notice = new Notice();          
-            foreach(var id in ids) { 
-                var Id = int.Parse(id);
-                var content = await _context.Notice.FindAsync(Id);
-                _context.Notice.Remove(content);
-                await _context.SaveChangesAsync();
-            }
-
             return RedirectToAction(nameof(Index));
         }
 
@@ -474,7 +465,7 @@ namespace Board.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CommentEdit(int Id, string UserName, string editComment )
+        public async Task<IActionResult> CommentEdit(int Id, string UserName, string editComment)
         {
             var comment = _context.Comments.FirstOrDefault(c => c.Id == Id);
 
@@ -508,7 +499,7 @@ namespace Board.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CommentDelete(int? commentId, [Bind("Id")] Notice notice)
@@ -518,7 +509,7 @@ namespace Board.Controllers
                 return Problem("Entity set 'BoardContext.Notice'  is null.");
             }
             var comment = await _context.Comments.FindAsync(commentId);
-            
+
             if (comment != null)
             {
                 _context.Comments.Remove(comment);
@@ -537,7 +528,7 @@ namespace Board.Controllers
 
         private bool NoticeExists(int id)
         {
-          return (_context.Notice?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.Notice?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }

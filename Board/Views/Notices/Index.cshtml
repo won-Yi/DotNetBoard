@@ -13,36 +13,31 @@
             console.log(selected)
             window.location.href = "/Notices/Index/?Category=" + selected;
         }
-    
 
         const rowPerPage = 10; //페이지당 몇개를 보여줄지
         const rows = document.querySelectorAll('#trs');
         const rowsCount = '@Model.Notices.Count'
-        const PageCount = Math.ceil(rowsCount/rowPerPage);
+        const PageCount = Math.ceil(rowsCount / rowPerPage);
         const numbers = document.querySelector('#numbers');
-        let idx ;
-
+        let idx;
         let start;
         let end;
 
-        
 
         //페이지네이션 생성
-        for (let i = 1 ; i <= PageCount; i++) {
+        for (let i = 1; i <= PageCount; i++) {
             numbers.innerHTML += `<li style="margin-left:10px;border-radius: 30px;"><a class="page-link" href=""> ${i} </a></li>`
         }
         const numbersBtn = numbers.querySelectorAll('a');
         const best = document.querySelectorAll('#Best');
         let bestArray = [...best]
-
-        numbersBtn.forEach(function(item,idx){
-            item.addEventListener('click', (e)=>{
+        numbersBtn.forEach(function (item, idx) {
+            item.addEventListener('click', (e) => {
                 e.preventDefault();
-                for (nb of numbersBtn){
-                   nb.classList.remove('active');
+                for (nb of numbersBtn) {
+                    nb.classList.remove('active');
                 }
                 e.target.classList.add('active');
-
                 console.log(best)
                 if (idx == 0) {
                     for (b of bestArray) {
@@ -53,61 +48,52 @@
                         b.style.display = 'none';
                     }
                 }
-
                 //테이블을 출력해주는 함수
-               displayRow(idx)
-
+                displayRow(idx)
             })
         });//
+        function displayRow(idx) {
 
-        function displayRow(idx){
-            
             start = idx * rowPerPage;
             end = start + rowPerPage; //0이면 10, 1이면 20,
-
             //[...row]이것도 Array.from(rows)와 같은 의미
             let rowsArray = Array.from(rows);
             //console.log(rowsArray)
             for (ra of rowsArray) {
-                ra.style.display='none';
+                ra.style.display = 'none';
             }
-                       
-            let newRows = rowsArray.slice(start,end);
-            for (nr of newRows){
+
+            let newRows = rowsArray.slice(start, end);
+            for (nr of newRows) {
                 nr.style.display = '';
             }//
 
-           
         }//displayRow
-
         //시작하자마자 실행되는 함수
+        
         displayRow(0);
 
         ids = []
- 
+
         //checkbox
-        function checkDelete(id){
+        function checkDelete(id) {
+            alert('살향')
             console.log(id)
             const chbox = document.getElementById(id)
-            const is_che
-
-            //생각보다 몇시간이나 걸렸던 부분
-            // 너무 어렵게 생각해서 계속 잘 안됐는데 그냥 inclues를 사용해서 이미 체크했던 값이 또 들어오면 삭제하는 것으로...
-            
+            const is_checked = chbox.checked;
             if (is_checked) {
                 ids.push(id);
-            }else{
+            } else {
                 if (ids.includes(id)) {
                     ids.splice(ids.indexOf(id), 1);
                 }
             }
-
             console.log('ids:', ids)
+        }//
 
-            }//
 
-
-        function BulkDelete(){
+        function BulkDelete() {
+            alert('실ㅇ행')
             $.ajax({
                 url: 'https://localhost:7295/Notices/BulkDelete',
                 type: 'POST',
@@ -121,60 +107,52 @@
             });
         }
 
+        
+
         //전체체크 클릭 시
         function checkAll() {
             ids = [] //전체 클릭시 일단 배열 싹 비워
-
-
             let rowsArray = Array.from(rows);
             let newRows = rowsArray.slice(start, end);
-
             var cboxes = document.getElementsByName("cbox");
-
             for (var i = 0; i < newRows.length; i++) {
-                    //chboxe의 id값을 가져와서 ids에 push하여 준다.
-                    cboxes[i].checked = document.getElementById("checkall").checked;
-                    console.log(cboxes[i].id)
-                    ids.push(cboxes[i].id)
-                }
-
+                //chboxe의 id값을 가져와서 ids에 push하여 준다.
+                cboxes[i].checked = document.getElementById("checkall").checked;
+                console.log(cboxes[i].id)
+                ids.push(cboxes[i].id)
+            }
             console.log(ids);
-            }//
-
-</script>
+        }//
+    </script>
 }
 
 <style>
-    #numbers li a.active{
-       
+    #numbers li a.active {
     }
+
     .paginationwrap {
         width: 100%;
-        height:80px;
-        margin-top:50px;
-        
+        height: 80px;
+        margin-top: 50px;
         position: relative;
     }
 
-    .pagination{
+    .pagination {
         width: 100px;
         height: 100px;
-       
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
     }
 
-    .BestNotice{
+    .BestNotice {
         background-color: #EBF5FF;
     }
 
- 
     .material-symbols-outlined {
         font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 48
     }
-
 </style>
 @*
 asp-items="Model.Categorys"*@
@@ -189,7 +167,6 @@ asp-items="Model.Categorys"*@
         </select>
     </div>
     <div>
-        
     </div>
     <div>
         <form asp-controller="Notices" asp-action="Index" method="get">
@@ -204,7 +181,7 @@ asp-items="Model.Categorys"*@
 
 <div>
     <span id="displayCount"></span>
-        <table class="table table-striped table-hover" style="margin-top:30px;">
+    <table class="table table-striped table-hover" style="margin-top:30px;">
         <thead id="theadalways" style="background-color:#505050; color:white;">
             <tr>
                 <th>
@@ -233,21 +210,21 @@ asp-items="Model.Categorys"*@
         <tbody>
             @foreach (var i in Model.BestNotice!)
             {
-            <tr class="BestNotice" id="Best">
-                <td>
-                    <span class="material-symbols-outlined" style="margin-left:20px;">
-                        favorite
-                    </span>
-                </td>
-                <td>
+                <tr class="BestNotice" id="Best">
+                    <td>
+                        <span class="material-symbols-outlined" style="margin-left:20px;">
+                            favorite
+                        </span>
+                    </td>
+                    <td>
                         @Html.DisplayFor(modelItem => i.Id)
-                </td>
+                    </td>
                     <td>
                         @Html.DisplayFor(modelItem => i.Category)
                     </td>
                     <td>
                         <a asp-action="Details" asp-route-id="@i.Id" style="text-decoration: none; color:black; ">
-                           @Html.DisplayFor(modelItem => i.Title)
+                            @Html.DisplayFor(modelItem => i.Title)
                         </a>
                     </td>
                     <td>
@@ -259,18 +236,17 @@ asp-items="Model.Categorys"*@
                     <td>
                         @Html.DisplayFor(modelItem => i.Views_Number)
                     </td>
-            </tr>
+                </tr>
             }
-           
+
             @foreach (var item in Model.Notices!)
             {
                 <tr id="trs">
                     <td>
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" value=""
-                                   name ="cbox" id="@item.Id" style="border:solid gray;"
-                                   onclick="checkDelete('@item.Id')"
-                                    />
+                                   name="cbox" id="@item.Id" style="border:solid gray;"
+                                   onclick="checkDelete('@item.Id')" />
                             @*onclick="if(this.checked){ checkDelete('@item.Id'); }"*@
                             <label class="form-check-label" for="flexCheckDefault">
                             </label>
@@ -300,7 +276,7 @@ asp-items="Model.Categorys"*@
     </table>
 </div>
 <div style="display:flex; justify-content:space-between">
-   
+
     <div>
         <button class="btn btn-outline-success" onclick="BulkDelete()">삭제</button>
     </div>
@@ -316,5 +292,3 @@ asp-items="Model.Categorys"*@
         </ol>
     </div>
 </div>
-
-
