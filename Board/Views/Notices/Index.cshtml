@@ -16,6 +16,8 @@
         }
 
         const rowPerPage = 10; //페이지당 몇개를 보여줄지
+
+
         const rows = document.querySelectorAll('#trs');
         const rowsCount = '@Model.Notices.Count'
         const PageCount = Math.ceil(rowsCount / rowPerPage);
@@ -78,7 +80,6 @@
 
         //checkbox
         function checkDelete(id) {
-            
             console.log(id)
             const chbox = document.getElementById(id)
             const is_checked = chbox.checked;
@@ -91,7 +92,6 @@
             }
             console.log('ids:', ids)
         }//
-
 
         function BulkDelete() {
             alert('실ㅇ행')
@@ -109,10 +109,12 @@
         }
 
 
+        
 
-        //전체체크 클릭 시 
+        //전체체크 클릭 시
         function checkAll() {
-            ids = [] //전체 클릭시 일단 배열 싹 비워 / 처음엔 비워지는데 그 다음엔 안비워짐 문제..
+            ids = [] //전체 클릭시 일단 배열 싹 비워
+
             let rowsArray = Array.from(rows);
             let newRows = rowsArray.slice(start, end);
             var cboxes = document.getElementsByName("cbox");

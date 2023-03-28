@@ -71,10 +71,14 @@
 <hr />
 
 <div>
+
    
      <div>
         @*enctype="multipart/form-data"*@
         <form asp-action="Create" method="post" id="createForm" >
+
+    <div>
+
             <select asp-for="Category" name="Category" class="form-select" style="width:200px;">
                 <option value="">All</option>
                 <option value="잡담">잡담</option>
@@ -95,11 +99,10 @@
             
             <div class="content" style="margin-top:20px;">
                 <label asp-for="Content" class="control-label"></label>
+
                 <textarea asp-for="Content" id="editor" name="Content" class="form-control"></textarea>
                @* <label asp-for="Content" class="control-label"></label>
                 <textarea asp-for="Content" class=" form-control"></textarea>
-                asp-for="Content"
-                <span asp-validation-for="Content" class="text-danger"></span>*@
             </div>
             @*<div class="upload-container">
                 <input type="file" name="files" id="file" multiple />
@@ -120,10 +123,44 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+
         ClassicEditor
             .create(document.querySelector('#editor'))
             .catch(error => {
                 console.error(error);
+
+
+        function fnSendFile() {
+
+            let formData = new FormData();
+            let files = $('input=[name=files]')[0].files;
+            for (i = 0; i < files.length; i++) {
+                formData.append('files', files[i])
+            }
+
+            $.ajax({
+                url: '/Notices/Create',
+                data: formData,
+                type: "POST",
+                contentType: false,
+                processData: false,
+                async: false,
+                success: function (data) {
+                    if (data.result == 0) {
+                                 파일 업로드 후 리스트 초기화
+                        alert("파일 업로드 완료!");
+                                 컨트롤러 메인 페이지로 이동
+                        window.location.href = "/Home";
+                    }
+                    else {
+                        alert("파일 업로드 실패!");
+                    }
+                },
+                error: function (err) {
+                             에러일 경우 에러 메세지 출력
+                    alert(err.statusText);
+                }
+
             });
 
         function getContent(){
