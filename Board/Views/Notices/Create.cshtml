@@ -3,12 +3,14 @@
 @{
     ViewData["Title"] = "Create";
 }
+@*
+    <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter.js"></script>
+*@
 
 @section Styles{
     <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
-    
+    <script src="https://cdn.ckeditor.com/ckeditor5/32.0.0/uploadadapter/adapters/simpleuploadadapter.js"></script>
 }
-
 
 <style>
     .form-select {
@@ -75,10 +77,14 @@
    
      <div>
         @*enctype="multipart/form-data"*@
+<<<<<<< HEAD
+        <form asp-action="Create" method="post" id="createForm" enctype="multipart/form-data">
+=======
         <form asp-action="Create" method="post" id="createForm" >
 
     <div>
 
+>>>>>>> 689750d4ae2f5ae9cbfd349ac34140be4c3734d3
             <select asp-for="Category" name="Category" class="form-select" style="width:200px;">
                 <option value="">All</option>
                 <option value="잡담">잡담</option>
@@ -103,10 +109,18 @@
                 <textarea asp-for="Content" id="editor" name="Content" class="form-control"></textarea>
                @* <label asp-for="Content" class="control-label"></label>
                 <textarea asp-for="Content" class=" form-control"></textarea>
+<<<<<<< HEAD
+                asp-for="Content"
+                <span asp-validation-for="Content" class="text-danger"></span>*@
+                <input type="file" name="files" class="ckeditor-file-upload">
+=======
+>>>>>>> 689750d4ae2f5ae9cbfd349ac34140be4c3734d3
             </div>
             @*<div class="upload-container">
                 <input type="file" name="files" id="file" multiple />
             </div>*@
+           
+
             <div class="form-group" style="margin-bottom:20px;">
                 <input type="submit" value="게시글 작성" class="btn btn-secondary" @*onclick="fnSendFile()"*@ onclick="getContent()" />
             </div>
@@ -123,9 +137,41 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
+<<<<<<< HEAD
+        //ClassicEditor
+        //    .create(document.querySelector('#editor'),{
+
+               
+        //    })
+        //    .catch(error => {
+        //        console.error(error);
+        //    });
+
+        //ClassicEditor
+        //    .create(document.querySelector('#editor'))
+        //    .catch(error => {
+        //        console.error(error);
+        //    });
+=======
+>>>>>>> 689750d4ae2f5ae9cbfd349ac34140be4c3734d3
 
         ClassicEditor
-            .create(document.querySelector('#editor'))
+            .create(document.querySelector('#editor'), {
+                //toolbar: [... ], // 에디터 툴바 옵션들
+                image: {
+                    // 이미지 업로드 설정
+                    toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
+                    styles: [
+                        'full',
+                        'alignLeft',
+                        'alignRight'
+                    ]
+                },
+                simpleUpload: {
+                    // 이미지 업로드 URL
+                    uploadUrl: 'https://localhost:7295/Notices/Create/'
+                }
+            })
             .catch(error => {
                 console.error(error);
 
@@ -163,11 +209,13 @@
 
             });
 
+       
         function getContent(){
-            alert('45345345');
+            alert('글작성 함수');
             var editorData = editor.getData();
             $('#editor').val(editorData);
         }
+
 
     </script>
 }
