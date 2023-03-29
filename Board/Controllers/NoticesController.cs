@@ -64,6 +64,11 @@ namespace Board.Controllers
         //Notice[]?로 해야 Notice의 객체는 게시물에 대한 정보를 담고 있으므로
         //정보를 다 가져올 수 있다..
         public Notice[]? BestNotice { get; set; }
+        
+        //user의 id
+        public int UserId { get; set; }
+        public string UserNickName { get; set; }
+
 
     }
 
@@ -82,7 +87,7 @@ namespace Board.Controllers
 
         // GET: Notices
         [ActionName("Index")]
-        public async Task<IActionResult> Index(string? Category, string? searchString)
+        public async Task<IActionResult> Index(string? Category, string? searchString, int id)
         {
 
            //LINQ 
@@ -126,11 +131,30 @@ namespace Board.Controllers
             };
             //이걸 noticeDTO로 새롭게 만들어서 noticeCategory저거 자체를 DTO에 넣고 보낼 수 있을까?
 
+            //userid로 username가져오기
+            User user = new User();
+            var findUser = _context.User.FirstOrDefault(m => m.UserId == id);
+
+            var usernickname="";
+
+            if (findUser != null)
+            {
+                usernickname = findUser.UserNickName;
+                // usernickname 변수를 이용한 작업 수행
+            }
+            else
+            {
+                usernickname = "알수없음";
+            }
+            
+
+
             var NoticeDto = new NoticeDto
             {
                 Categorys = noticeCategory.Categorys,
                 Notices = noticeCategory.Notices,
                 BestNotice = notice_best,
+                UserNickName = usernickname,
             };
 
             return View(NoticeDto);
@@ -153,15 +177,12 @@ namespace Board.Controllers
 
             var filemodel = from m in _context.FileModel where m.NoticeId == id select m;
 
-            string content = notice.Content;
-            string encodedContent = WebUtility.HtmlDecode(content);
-
 
             var notice_dto = new NoticeDto()
             {
                 Id = notice.Id,
                 UserName = notice.UserName,
-                Content = encodedContent,
+                Content = notice.Content,
                 Title = notice.Title,
                 UpdateDate = notice.UpdateDate,
                 Views_Number = notice.Views_Number,
@@ -184,6 +205,9 @@ namespace Board.Controllers
 
             Notice notice = new Notice();
             notice =  await _context.Notice.FirstOrDefaultAsync(m => m.Id == Id);
+            if (notice.LikeNotice == null) {
+                notice.LikeNotice = 0;
+            }
 
             notice.LikeNotice++;
             await _context.SaveChangesAsync();
@@ -193,23 +217,23 @@ namespace Board.Controllers
 
 
         //파일 다운로드
-        public FileResult FileDownload(string? filename) {
+        //public FileResult FileDownload(string? filename) {
 
-            FileModel fileModel = new FileModel();
-            fileModel = _context.FileModel.FirstOrDefault(m => m.FileNames == filename);
+        //    FileModel fileModel = new FileModel();
+        //    fileModel = _context.FileModel.FirstOrDefault(m => m.FileNames == filename);
 
 
-            string filepath = fileModel.FilePath;        // 파일 경로
-            string filenames = fileModel.FileNames;      // 파일명
-            string path = filepath;  // 파일 경로 / 파일명
+        //    string filepath = fileModel.FilePath;        // 파일 경로
+        //    string filenames = fileModel.FileNames;      // 파일명
+        //    string path = filepath;  // 파일 경로 / 파일명
                
             
                 
-            // 파일을 바이트 형식으로 읽음
-            byte[] bytes = System.IO.File.ReadAllBytes(path);
-            // 파일 다운로드 처리
-            return File(bytes, "application/octet-stream", filenames);
-        }
+        //    // 파일을 바이트 형식으로 읽음
+        //    byte[] bytes = System.IO.File.ReadAllBytes(path);
+        //    // 파일 다운로드 처리
+        //    return File(bytes, "application/octet-stream", filenames);
+        //}
 
 
 
@@ -228,75 +252,138 @@ namespace Board.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(/*List<IFormFile> files,*/ [Bind("Id", "Title", "Content", "UserName", "Category")] Notice notice)
+        public async Task<IActionResult> Create(List<IFormFile> files, [Bind("Id", "Title", "Content", "UserName", "Category")] Notice notice)
         {
-            //int result = -1;
 
+            int result = -1;
             if (ModelState.IsValid)
             {
-                //현재 시간을 데이터 베이스에 넣어준다.
                 DateTime time_now = DateTime.Now;
                 notice.UpdateDate = time_now;
-
                 _context.Add(notice);
                 await _context.SaveChangesAsync();
 
-                //string uploadDir = "D:/code/Board/UploadPath/";
-                //try
-                //{
-                //    // 업로드 폴더 경로 존재 확인
-                //    DirectoryInfo di = new DirectoryInfo(uploadDir);
-                //    // 폴더가 없을 경우 신규 작성
-                //    if (di.Exists == false) di.Create();
+                string uploadDir = "D:/code/Board/UploadPath/";
+                try
+                {
+                   // 업로드 폴더 경로 존재 확인
+                   DirectoryInfo di = new DirectoryInfo(uploadDir);
+                    //폴더가 없을 경우 신규 작성
+                            if (di.Exists == false) di.Create();
 
-                //    // 선택한 파일 개수만큼 반복
-                //    foreach (var formFile in files)
-                //    {
-                //        if (formFile.Length > 0)
-                //        {
-                //            var fileFullPath = uploadDir + formFile.FileName;
+                    //선택한 파일 개수만큼 반복
+                    foreach (var formFile in files)
+                    {
+                        if (formFile.Length > 0)
+                        {
+                            var fileFullPath = uploadDir + formFile.FileName;
 
-                //            // 파일명이 이미 존재하는 경우 파일명 변경
-                //            int filecnt = 1;
-                //            System.String newFilename = string.Empty;
-                //            while (new FileInfo(fileFullPath).Exists)
-                //            {
-                //                var idx = formFile.FileName.LastIndexOf('.');
-                //                var tmp = formFile.FileName.Substring(0, idx);
-                //                newFilename = tmp + System.String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
-                //                fileFullPath = uploadDir + newFilename;
-                //            }
+                            //파일명이 이미 존재하는 경우 파일명 변경
+                                    int filecnt = 1;
+                            System.String newFilename = string.Empty;
+                            while (new FileInfo(fileFullPath).Exists)
+                            {
+                                var idx = formFile.FileName.LastIndexOf('.');
+                                var tmp = formFile.FileName.Substring(0, idx);
+                                newFilename = tmp + System.String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
+                                fileFullPath = uploadDir + newFilename;
+                            }
 
-                           
+                            FileModel model = new FileModel();
 
-                //            FileModel model = new FileModel();
+                            model.NoticeId = notice.Id;
+                            model.FilePath = fileFullPath;
+                            model.FileNames = formFile.FileName;
+                            _context.Add(model);
+                            await _context.SaveChangesAsync();
 
-                //            model.NoticeId = notice.Id;
-                //            model.FilePath = fileFullPath;
-                //            model.FileNames = formFile.FileName;
-                //            _context.Add(model);
-                //            await _context.SaveChangesAsync();
+                            //파일 업로드
+                            using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
+                            {
+                             await formFile.CopyToAsync(stream);
+                            }
+                        }
+                    }
+                    result = 0;
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
 
-                //            // 파일 업로드
-                //            using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
-                //            {
-                //                await formFile.CopyToAsync(stream);
-                //            }
-                //        }
-                    //}
-                //    result = 0;
-                //}
-                //catch (Exception)
-                //{
-                //    throw;
-                //}
-                //Notice notice = new Notice();
                 return RedirectToAction(nameof(Index));
             }
-            
-
             return View(notice);
         }
+        //public async Task<IActionResult> Create(List<IFormFile> files, [Bind("Id", "Title", "Content", "UserName", "Category")] Notice notice)
+        //{
+        //    int result = -1;
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        현재 시간을 데이터 베이스에 넣어준다.
+        //        DateTime time_now = DateTime.Now;
+        //        notice.UpdateDate = time_now;
+
+        //        _context.Add(notice);
+        //        await _context.SaveChangesAsync();
+
+        //        string uploadDir = "D:/code/Board/UploadPath/";
+        //        try
+        //        {
+        //            업로드 폴더 경로 존재 확인
+        //           DirectoryInfo di = new DirectoryInfo(uploadDir);
+        //            폴더가 없을 경우 신규 작성
+        //            if (di.Exists == false) di.Create();
+
+        //            선택한 파일 개수만큼 반복
+        //            foreach (var formFile in files)
+        //            {
+        //                if (formFile.Length > 0)
+        //                {
+        //                    var fileFullPath = uploadDir + formFile.FileName;
+
+        //                    파일명이 이미 존재하는 경우 파일명 변경
+        //                    int filecnt = 1;
+        //                    System.String newFilename = string.Empty;
+        //                    while (new FileInfo(fileFullPath).Exists)
+        //                    {
+        //                        var idx = formFile.FileName.LastIndexOf('.');
+        //                        var tmp = formFile.FileName.Substring(0, idx);
+        //                        newFilename = tmp + System.String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
+        //                        fileFullPath = uploadDir + newFilename;
+        //                    }
+
+
+
+        //                    FileModel model = new FileModel();
+
+        //                    model.NoticeId = notice.Id;
+        //                    model.FilePath = fileFullPath;
+        //                    model.FileNames = formFile.FileName;
+        //                    _context.Add(model);
+        //                    await _context.SaveChangesAsync();
+
+        //                    파일 업로드
+        //                    using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
+        //                    {
+        //                        await formFile.CopyToAsync(stream);
+        //                    }
+        //                }
+        //            }
+        //            result = 0;
+        //        }
+        //        catch (Exception)
+        //        {
+        //            throw;
+        //        }
+        //        Notice notice = new Notice();
+        //        return RedirectToAction(nameof(Index));
+        //    }
+
+
+        //    return View(notice);
+        //}
 
         // GET: Notices/Edit/5
         public async Task<IActionResult> Edit(int? id)

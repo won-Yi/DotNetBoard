@@ -1,0 +1,88 @@
+﻿@model Board.Models.User
+@{
+    ViewData["Title"] = "Join";
+}
+
+<h1>Join</h1>
+
+<div class="whole-wrap" style="width:350px; margin:auto; margin-top:10%;">
+    <div>
+        @*<form asp-action="Join" method="post">*@
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Name</span>
+                <input type="text" class="form-control" id="username" Sizing example input" aria-describedby="inputGroup-sizing-default">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Email</span>
+                <input type="text" class="form-control" id="email" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Pssword</span>
+                <input type="password" id="password1" 
+                class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+            </div>
+            <div class="input-group mb-3">
+                <span class="input-group-text" id="inputGroup-sizing-default">Password Check</span>
+                <input type="password" id="password2" onkeyup='passwordCheck()'
+                       class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
+            <div style="margin-top:20px;">
+                <div id='result'></div>
+            </div>
+            </div>
+        <input type="button" value="가입하기" onclick="submitpassword()" />
+        @*</form>*@
+    </div>
+    
+</div>
+
+@section Scripts{
+<script>
+
+        function passwordCheck() {
+            
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+            if(password1 != password2){
+                document.getElementById("result").innerText = "패스워드를 다시 확인해주세요";
+            }else{
+                document.getElementById("result").innerText = "패스워드가 확인되었습니다.";
+            }
+        }
+
+        function submitpassword() {
+            alert('erwerwer')
+            const password1 = document.getElementById('password1').value;
+            const password2 = document.getElementById('password2').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+
+
+            alert(username)
+            alert(email)
+          
+            if(password1 != password2){
+                alert('비밀번호를 확인해주세요.')
+            }else{
+                alert('else')
+                $.ajax({
+                    type:'POST',
+                    url: 'https://localhost:7295/User/Join',
+                    data: {
+                        'password':password1,
+                        'username':username,
+                        'email':email,
+                    },
+                    success: function (result) {
+                        window.location.href = "https://localhost:7295/User/Login";
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error:", textStatus, errorThrown);
+                    }
+                })//ajax
+            }//else
+        }//
+
+
+</script>
+
+}

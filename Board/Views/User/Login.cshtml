@@ -1,0 +1,62 @@
+﻿@model Board.Models.User;
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+
+
+<div class="wrap" style="width:400px; margin:auto;margin-top:20%;">
+    <div>Login</div>
+    <br />
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Email</span>
+        <input type="text" id="email"
+               class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+    </div>
+    <div class="input-group mb-3">
+        <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
+        <input type="password" id="password" onkeyup='passwordCheck()'
+               class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
+    </div>
+    
+    <input type="button" value="로그인" onclick="loginSubmit()" />
+    
+</div>
+
+@section Scripts{
+   <script>
+        function loginSubmit() {
+            alert('erwerwer')
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            $.ajax({
+                type: 'POST',
+                url: 'https://localhost:7295/User/Login',
+                data: {
+                    'password': password,
+                    'email': email,
+                },
+                success: function (result) {
+                if (result.success) {
+                    console.log(result.success)
+                    var id = result.data.id
+                    console.log(id)
+                    window.location.href = 'https://localhost:7295/Notices/Index/'+id
+                }else{
+                    alert('로그인에 실패하였습니다.')
+                }
+                },
+                error: function () {
+                    alert('통신에러발생.')
+                }
+            })//ajax
+        }//
+
+       function onAlert(){
+        alert('로그인을 다시 시도해주세요.')
+       }
+   </script>
+
+}
