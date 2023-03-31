@@ -60,46 +60,55 @@
             .upload-container input:hover {
                 background: #ddd;
             }
+
+    .ck-content {
+        min-height: 550px;
+    }
+
+    .ck-content {
+        margin-bottom: 20px;
+    }
 </style>
 <div style="margin-top:30px;"></div>
 <h4>Notice</h4>
 <hr />
 <div>
     <div>
-        <form asp-action="Edit" method="post" enctype="multipart/form-data">
-            <select asp-for="Category" name="Category" class="form-select">
+      @*  <form asp-action="Edit" method="post" enctype="multipart/form-data">*@
+        <select asp-for="Category" name="Category" id="category" class="form-select">
                 <option value="">All</option>
                 <option value="잡담">잡담</option>
                 <option value="유머">유머</option>
                 <option value="정보">정보</option>
             </select>
             <div class="form-group username">
-                <label asp-for="UserName" class="control-label"></label>
-                <input asp-for="UserName" class="form-control" value=@Model.UserName />
-                <span asp-validation-for="UserName" class="text-danger"></span>
+
+            <input asp-for="UserName" class="form-control" id="username" value=@Model.UserName />
+            <span asp-validation-for="UserName"  class="text-danger"></span>
             </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="form-group">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control title" value="@Model.Title" />
+
+            <input asp-for="Title" class="form-control title" id="title" value="@Model.Title" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="Content" class="control-label"></label>
+              
                 @*<textarea asp-for="Content" class="form-control">@Model.Content</textarea>*@
-                <textarea asp-for="Content" id="editor" name="Content" class="form-control">@Model.Content</textarea>
+            <textarea asp-for="Content" id="editor" name="Content" class="form-control">@Html.Raw(Model.Content)</textarea>
                 <span asp-validation-for="Content" class="text-danger"></span>
             </div>
-            <div class="upload-container">
+            @*<div class="upload-container">
                 <input type="file" name="files" id="file" multiple />
-            </div>
+            </div>*@
             <div class="form-group" style="margin-bottom:20px; margin-top:20px;">
-                <input type="submit" value="수정" class="btn btn-outline-primary" onclick="fnSendFile()" />
+            <input type="submit" value="수정" class="btn btn-outline-primary" id="actionCreate" @*onclick="fnSendFile()"*@ />
+             <input type="hidden" id="id_value" value="@Model.Id" />
             </div>
-            <input type="hidden" asp-for="Id" />
-            <input type="hidden" asp-for="LikeNotice" />
-        </form>
+           @* <input type="hidden" asp-for="Id" />
+            
+        </form>*@
     </div>
 </div>
 
@@ -113,17 +122,94 @@
     }
     <script>
 
+        class UploadAdapter {
+            constructor(loader, url) {
+                this.loader = loader;
+                this.url = url;
+            }
+
+            upload() {
+                return this.loader.file.then(file => new Promise((resolve, reject) => {
+                    let formData = new FormData();
+                    formData.append('file', file);
+                    fetch(this.url, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then(response => {
+                            response.json().then(data => {
+                                const url = new URL(data.imageUrl, window.location.origin); // URL 생성
+                                const absoluteUrl = url.href // 절대 경로 추출
+                                resolve({
+                                    default: absoluteUrl
+                                });
+                            });
+
+                        })
+                        .catch(error => {
+                            reject('파일 업로드 중 오류가 발생했습니다.');
+                        });
+                }));
+            }
+
+            abort() {
+                // 업로드가 취소되는 경우에 수행할 작업을 여기에 작성합니다.
+            }
+        }
+
+
         ClassicEditor
             .create(document.querySelector('#editor'))
-            .catch(error => {
-                console.error(error)
-            });
+            .then(editor => {
+                editor.model.document.on('change', () => {
+                    var htmlContent = editor.getData();
+                    document.getElementById("editor").value = htmlContent;
+                });
 
-        function getContent() {
-            alert('45345345')
-            var editorData = editor.getData()
-            $('#editor').val(editorData)
-        }
+                editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                    return new UploadAdapter(loader, 'https://localhost:7295/Notices/Upload');
+                };
+            })
+            .catch(error => {
+                console.error(error);
+            });//
+
+
+        document.querySelector('#actionCreate').addEventListener('click', () => {
+            let content = document.getElementById('editor').value;
+            let id = document.getElementById('id_value').value;
+            console.log(id,'id_value');
+            let title = document.getElementById('title').value;
+            let username = document.getElementById('username').value;
+            let select = document.getElementById('category');
+            let selectValue = select.value;
+
+            console.log(content, title, username, selectValue)
+
+            $.ajax({
+                url: "https://localhost:7295/Notices/Edit/" + id,
+                data: {
+                    "content": content,
+                    "title": title,
+                    "username": username,
+                    "category": selectValue,
+                },
+                type: "POST",
+                success: function (data) {
+                    console.log(data.result)
+                    if (data.result == 0) {
+                        window.location.href = "https://localhost:7295/Notices/Details/" + id;
+                    }
+                    else {
+                        alert("실패");
+                    }
+                },
+                error: function (err) {
+
+                    alert(err.statusText);
+                }
+            });//ajax
+        });
 
         //function fnSendFile() {
 
