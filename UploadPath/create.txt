@@ -1,4 +1,4 @@
-﻿@model Board.Models.Notice
+@model Board.Models.Notice
 
 @{
     ViewData["Title"] = "Create";
@@ -8,7 +8,7 @@
 @section Styles{
     <script src="https://cdn.ckeditor.com/ckeditor5/34.0.0/classic/ckeditor.js"></script>
     <script src="https://cdn.ckeditor.com/ckeditor5/34.0.0/classic/translations/ko.js"></script>
-   
+    <script src="/upload-adapter.js"></script>
     
 }
 <style>
@@ -65,18 +65,12 @@
             background: #ddd;
         }
 
-        .ck-content {
-            min-height: 400px;
-        }
-
-        .ck-content{
-            margin-bottom:20px;
-        }
 </style>
 
 <h1>@ViewBag.Category</h1>
 <h4>Notice</h4>
 <hr />
+
 <div>
 
      <div>
@@ -90,21 +84,21 @@
                 <option value="정보">정보</option>
             </select>
             <div class="form-group username" style="margin-bottom:20px; margin-top:20px; width:200px;">
-               @* <label asp-for="UserName" class="control-label">이름</label>*@
-                <input asp-for="UserName" class="form-control" id="username" placeholder="이름"/>
+                <label asp-for="UserName" class="control-label">이름</label>
+                <input asp-for="UserName" class="form-control" id="username"/>
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group" id="titlediv" style="margin-top:20px;">
-              @*  <label asp-for="제목" class="control-label"></label>*@
-            <input asp-for="Title" id="title" class="form-control title" placeholder="제목" />
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" id="title" class="form-control title" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             
             
             <div class="content" style="margin-top:20px;">
                
-              @*  <label asp-for="Content" class="control-label"></label>*@
+                <label asp-for="Content" class="control-label"></label>
                 <textarea asp-for="Content" id="editor" name="Content" class="form-control"></textarea>
                
 
@@ -114,12 +108,12 @@
                 <span asp-validation-for="Content" class="text-danger"></span>*@
                
             </div>
-            <div class="upload-container">
+            @*<div class="upload-container">
                 <input type="file" name="files" id="file" multiple />
-            </div>
+            </div>*@
 
             <div class="form-group" style="margin-bottom:20px;">
-            <input type="button" value="게시글 작성" class="btn btn-secondary" id="actionCreate" @*onclick="fnSendFile()"*@ />
+                <input type="button" value="게시글 작성" class="btn btn-secondary" id="actionCreate" @*onclick="fnSendFile()"*@ />
             </div>
         @*</form>*@
     </div>
@@ -164,16 +158,18 @@
                                         default: absoluteUrl
                                     });
                                 });
+                           
                         })
                         .catch(error => {
                             reject('파일 업로드 중 오류가 발생했습니다.');
                         });
                 }));
             }
+
             abort() {
                 // 업로드가 취소되는 경우에 수행할 작업을 여기에 작성합니다.
             }
-        }//upload 함수
+        }
 
 
         ClassicEditor
@@ -181,6 +177,7 @@
             .then(editor => {
                 editor.model.document.on('change', () => {
                     var htmlContent = editor.getData();
+                    console.log(htmlContent);
                     document.getElementById("editor").value = htmlContent;
                 });
 
@@ -193,23 +190,6 @@
             });
 
         document.querySelector('#actionCreate').addEventListener('click', () => {
-            
-            //첨부파일
-            //alert('첨부파일 함수 실행')
-            let formData = new FormData();
-            let files = $('input[name=files]')[0].files;
-            for (i = 0; i < files.length; i++) {
-                console.log(formData, files[i],'e3')
-
-                formData.append('files', files[i]);
-                formData.append('username','won')
-            }
-
-            for (let value of formData.values()) {
-                console.log(value,'formvalue');
-            }
-           
-            //게시글 전송
             let content = document.getElementById('editor').value;
             //document.getElementById('editor').value = editorData;
             
@@ -217,22 +197,18 @@
             let username = document.getElementById('username').value;
             let select = document.getElementById('category');
             let selectValue = select.value;
+           
+            console.log(content, title, username, selectValue)
 
-            formData.append("title",title)
-            formData.append("username",username)
-            formData.append("category",selectValue)
-            formData.append("content",content)
-
-            for (let value of formData.values()) {
-                console.log(value, 'formvafidkdknalelue');
-            }
-            
             $.ajax({
                 url: '/Notices/Create',
-                data: formData,
+                data: {
+                "content": content,
+                "title":title,
+                "username":username,
+                "category":selectValue,
+                },
                 type: "POST",
-                contentType: false,
-                processData: false,
                 success: function (data) {
                     console.log(data.result)
                     if (data.result == 0) {
@@ -247,101 +223,8 @@
                     alert(err.statusText);
                 }
 
-            });//ajax
-        });//onclick event
-
-
-        var _FormData = new FormData(); // 서버 전송 폼 변수
-        var _FILE_MAX_SIZE = 10;        // 업로드 파일 최대 사이즈
-
-        window.onload = function () {
-            // 드래그 앤드 드롭 이벤트가 일어나는 태그
-            var fileArea = document.getElementById('dragDropArea');
-            // 첨부파일  Input태그
-            var fileInput = document.getElementById('fileInput');
-            // 파일을 드래그 해서 범위 안에 두었을 때 발생하는 이벤트
-            fileArea.addEventListener('dragover', function (evt) {
-                evt.preventDefault();
-                fileArea.classList.add('dragover');
             });
-            // 드래그 한 파일을 범위 밖으로 가져 갈 때 발생하는 이벤트
-            fileArea.addEventListener('dragleave', function (evt) {
-                evt.preventDefault();
-                fileArea.classList.remove('dragover');
-            });
-
-            // 드래그 한 파일을 범위 안에 두고 마우스를 떼었을 때 발생하는 이벤트
-            fileArea.addEventListener('drop', function (evt) {
-                evt.preventDefault();
-                fileArea.classList.remove('dragenter');
-                // 드래그 한 파일 정보를 가져오는 부분
-                var files = evt.dataTransfer.files;
-                // 첨부파일  Input태그에 드래그 한 파일을 적용
-                fileInput.files = files;
-                // 파일 선택 확인 함수 호출
-                fnSelectFile();
-            });
-        }
-
-        // 파일 선택 확인
-        function fnSelectFile() {
-            // 파일 사이즈 확인
-            var maxsize = _FILE_MAX_SIZE * 1024 * 1024;
-            // 첨부파일 Input태그 호출
-            var input = document.getElementById('fileInput');
-            // Input 태그에서 선택된 파일 개수 만큼 반복
-            for (var i = 0; i < input.files.length; ++i) {
-                var name = input.files.item(i).name; // 파일명
-                var size = input.files.item(i).size; // 파일 사이즈
-
-                // 파일 사이즈 체크
-                if (size > maxsize) {
-                    alert("파일은 " + _FILE_MAX_SIZE + "Byte 이하만 가능합니다.");
-                }
-                else {
-                    // 폼 데이터에 파일 정보 보존
-                    _FormData.append("files", input.files[i]);
-                }
-            }
-
-            // 선택 파일을 화면에 표시
-            fnDisplayFileList();
-        }
-
-        // 선택한 파일을 삭제
-        //function fnCancelFile(name, size) {
-        //    // 폼 데이터의 파일 정보 취득
-        //    var filelist = _FormData.getAll("files");
-        //    // 폼 데이터의 파일 정보 삭제
-        //    _FormData.delete("files");
-        //    // 취득한 파일 정보 개수 만큼 반복
-        //    for (var file of filelist) {
-        //        // 삭제 대상 파일인 경우 스킵
-        //        if (file.name == name && file.size == size) {
-        //            continue;
-        //        }
-        //        // 폼 데이터에 파일 정보를 다시 보존
-        //        _FormData.append("files", file);
-        //    }
-
-        //    // 선택 파일을 화면에 표시
-        //    fnDisplayFileList();
-        //}
-
-        // 선택 파일을 화면에 표시
-        function fnDisplayFileList() {
-            var children = "";
-            var output = document.getElementById('fileList');
-            filelist = _FormData.getAll("files");
-            for (var file of filelist) {
-                var name = file.name;
-                var size = file.size;
-                children += '📎&nbsp;&nbsp;&nbsp;' + name + ' ';
-                children += "<span style='cursor:pointer;color:red;' onclick='javascript:fnCancelFile(\"" + name + "\", " + size + ");'>✖</span><Br />";
-            }
-            // 추가되는 파일 목록 태그를 HTML에 적용
-            output.innerHTML = children;
-        }
+        });
     </script>
 }
 
