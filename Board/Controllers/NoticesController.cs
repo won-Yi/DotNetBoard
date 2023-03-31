@@ -103,6 +103,7 @@ namespace Board.Controllers
                                                select m.Category;
 
             var notice = from m in _context.Notice select m;
+            //List<Notice> noticeList = notice.ToList();
             //게시글 역순으로 불러오기 위한 orderby m.UpdateDate descending 추가
             //var notice_list = Enumerable.Reverse(_context.Notice).ToList(); 전에는 Reverse를 사용했었다.
             notice = from m in _context.Notice orderby m.UpdateDate descending select m;
@@ -168,8 +169,83 @@ namespace Board.Controllers
             return View(NoticeDto);
         }
 
-        // GET: Notices/Details/5
-        public async Task<IActionResult> Details(int? id, [Bind("Id,Comment,UserName")] Notice notice)
+        //다음글 이전글 가져오기
+        //var notice = from m in _context.Notice select m;
+        //List<Notice> noticeList = notice.ToList();
+        //만약 다음글이라고 누른다면 moveDetailPage함수에서 현재 글의 Id와 그 위치를 찾고
+        //다음글이나 이전글의 ID를 찾아내서 그걸 Detail인자로 주고 화면을 넘겨주면 된다..?입니다.
+        public async Task<IActionResult> MovePage(int targetId, int condition)
+        {
+            //condition이 0이면 이전글, 1이면 다음글
+
+           
+            int targetIndex;
+            int nextIndex = 0;
+            int beforeIndex = 0;
+
+           //다음글인지 이전글인지 if문써서 알아야 한다.
+            var notice = from m in _context.Notice select m;
+            //list 형태로 가져온다.
+            List<Notice> noticeList = notice.ToList();
+            if (noticeList.Count > 0) {
+                //내가 가져오려는 글이 몇번쨰 글인지 알아야 한다.
+                for (var i = 0; i < noticeList.Count; i++) {
+                    if (noticeList[i].Id == targetId) {
+                        //target Id index를 가져오기
+                        targetIndex = i;
+                        nextIndex = i+1;
+                        beforeIndex = i-1;                   
+                    }
+                }
+            }
+
+            //이전글인지 다음글인지 확인해서 값을 찾는 조건문
+            if (condition == 0)
+            {
+                //이전 값이 비어있지 않으면 게시글 정보 넘겨준다.
+                try {
+                    if (noticeList[beforeIndex] != null)
+                    {
+                        var beforeNotice = noticeList[beforeIndex];
+                        //detail page로 넘어간다.
+                        return Json(new { success = true, data = beforeNotice});
+                    }
+                    else
+                    {
+                        return Json(new { success = false, message = "해당 글이 없습니다." });
+                    }
+                } catch (Exception ex) {
+                    return StatusCode(500, $"Internal Server Error: {ex}");
+                }
+            }
+            else {
+                //다음 값이 비어있지 않으면 게시글 정보 넘겨준다.
+                try {
+                    if (nextIndex < 0 || nextIndex >= noticeList.Count)
+                    {
+                        return Json(new { success = false, message = "해당 글이 없습니다." });
+                    }
+                    else if (noticeList[nextIndex] != null) {
+                        var nextNotice = noticeList[nextIndex];
+                        //detailpage로 넘어간다.
+                        return Json(new { success = true, data = nextNotice });
+                    }
+                } catch (Exception ex)
+                {
+
+                    return StatusCode(500, $"Internal Server Error: {ex}");
+                }
+
+               
+            }
+           
+            Debug.WriteLine(noticeList);
+            
+            return View(notice);
+        }
+
+            // GET: Notices/Details/5
+            public async Task<IActionResult> Details(int? id, [Bind("Id,Comment,UserName")] Notice notice)
         {
 
             if (id == null || _context.Notice == null)
@@ -191,6 +267,7 @@ namespace Board.Controllers
                 Id = notice.Id,
                 UserName = notice.UserName,
                 Content = notice.Content,
+                Category = notice.Category,
                 Title = notice.Title,
                 UpdateDate = notice.UpdateDate,
                 Views_Number = notice.Views_Number,
@@ -533,7 +610,6 @@ namespace Board.Controllers
                     notice.UpdateDate = time_now;
                     
 
-
                     _context.Update(notice);
                     await _context.SaveChangesAsync();
                 }
@@ -567,6 +643,21 @@ namespace Board.Controllers
 
             _context.Notice.Remove(notice);
             await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> BulkDelete(List<int> ids)
+        {
+            Notice notice = new Notice();
+            foreach (var id in ids)
+            {
+                var notice_id = _context.Notice.Find(id);
+                _context.Notice.Remove(notice_id);
+                await _context.SaveChangesAsync();
+
+            }
             return RedirectToAction(nameof(Index));
         }
 

@@ -65,6 +65,13 @@
             background: #ddd;
         }
 
+        .ck-content {
+            min-height: 550px;
+        }
+
+        .ck-content{
+            margin-bottom:20px;
+        }
 </style>
 
 <h1>@ViewBag.Category</h1>
@@ -84,21 +91,21 @@
                 <option value="정보">정보</option>
             </select>
             <div class="form-group username" style="margin-bottom:20px; margin-top:20px; width:200px;">
-                <label asp-for="UserName" class="control-label">이름</label>
-                <input asp-for="UserName" class="form-control" id="username"/>
+               @* <label asp-for="UserName" class="control-label">이름</label>*@
+                <input asp-for="UserName" class="form-control" id="username" placeholder="이름"/>
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group" id="titlediv" style="margin-top:20px;">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" id="title" class="form-control title" />
+              @*  <label asp-for="제목" class="control-label"></label>*@
+            <input asp-for="Title" id="title" class="form-control title" placeholder="제목" />
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             
             
             <div class="content" style="margin-top:20px;">
                
-                <label asp-for="Content" class="control-label"></label>
+              @*  <label asp-for="Content" class="control-label"></label>*@
                 <textarea asp-for="Content" id="editor" name="Content" class="form-control"></textarea>
                
 
@@ -212,7 +219,7 @@
                 success: function (data) {
                     console.log(data.result)
                     if (data.result == 0) {
-                        //window.location.href = "https://localhost:7295/Notices/Index";
+                        window.location.href = "https://localhost:7295/Notices/Index";
                     }
                     else {
                         alert("실패");

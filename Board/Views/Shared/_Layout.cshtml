@@ -32,14 +32,19 @@
 </head>
 <body>
     <header>
-         <nav class="navbar bg-dark" data-bs-theme="dark">
-            <div class="container-fluid">
-                <a class="navbar-brand" href="https://localhost:7295/Notices/Index/">
-                    <img src="https://w7.pngwing.com/pngs/548/226/png-transparent-microsoft-office-365-computer-icons-computer-software-microsoft-angle-rectangle-microsoft-office.png" alt="Logo" width="30" height="24" class="d-inline-block align-text-top">
-                    SoftpKorea Board
-                </a>
-                <a href="https://localhost:7295/User/Join">Join</a>
-                <a href="https://localhost:7295/User/Login">Login</a>
+        <nav class="navbar bg-dark" data-bs-theme="dark" style="height:100px;">
+            <div style="display:flex; justify-content:space-around;">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="https://localhost:7295/Notices/Index/">
+                        <img src="https://w7.pngwing.com/pngs/548/226/png-transparent-microsoft-office-365-computer-icons-computer-software-microsoft-angle-rectangle-microsoft-office.png" alt="Logo" width="40" height="34" class="d-inline-block align-text-top">
+                        <span style="margin-left:10px;">SoftpKorea Board</span>
+                    </a>
+                
+                </div>
+                <div style="display:flex; margin-left:1200px;">
+                    <a href="https://localhost:7295/User/Join" style="margin-right:20px;">Join</a>
+                    <a href="https://localhost:7295/User/Login">Login</a>
+                </div>
             </div>
         </nav>
         @RenderSection("navbar", required: false)
