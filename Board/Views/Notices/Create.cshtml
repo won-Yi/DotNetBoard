@@ -3,15 +3,14 @@
 @{
     ViewData["Title"] = "Create";
 }
-@*
-    <script src="https://cdn.jsdelivr.net/npm/@ckeditor/ckeditor5-upload/src/adapters/simpleuploadadapter.js"></script>
-*@
+
 
 @section Styles{
-    <script src="https://cdn.ckeditor.com/ckeditor5/36.0.1/classic/ckeditor.js"></script>
-    <script src="https://cdn.ckeditor.com/ckeditor5/32.0.0/uploadadapter/adapters/simpleuploadadapter.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/34.0.0/classic/ckeditor.js"></script>
+    <script src="https://cdn.ckeditor.com/ckeditor5/34.0.0/classic/translations/ko.js"></script>
+    <script src="/upload-adapter.js"></script>
+    
 }
-
 <style>
     .form-select {
         margin-top:30px;
@@ -66,6 +65,13 @@
             background: #ddd;
         }
 
+        .ck-content {
+            min-height: 550px;
+        }
+
+        .ck-content{
+            margin-bottom:20px;
+        }
 </style>
 
 <h1>@ViewBag.Category</h1>
@@ -74,57 +80,49 @@
 
 <div>
 
-   
      <div>
         @*enctype="multipart/form-data"*@
-<<<<<<< HEAD
-        <form asp-action="Create" method="post" id="createForm" enctype="multipart/form-data">
-=======
-        <form asp-action="Create" method="post" id="createForm" >
 
-    <div>
-
->>>>>>> 689750d4ae2f5ae9cbfd349ac34140be4c3734d3
-            <select asp-for="Category" name="Category" class="form-select" style="width:200px;">
+       @* <form asp-action="Create" method="post" id="createForm" enctype="multipart/form-data">*@
+            <select asp-for="Category" name="Category" class="form-select" id="category" style="width:200px;">
                 <option value="">All</option>
                 <option value="잡담">잡담</option>
                 <option value="유머">유머</option>
                 <option value="정보">정보</option>
             </select>
             <div class="form-group username" style="margin-bottom:20px; margin-top:20px; width:200px;">
-                <label asp-for="UserName" class="control-label">이름</label>
-                <input asp-for="UserName" class="form-control" />
+               @* <label asp-for="UserName" class="control-label">이름</label>*@
+                <input asp-for="UserName" class="form-control" id="username" placeholder="이름"/>
                 <span asp-validation-for="UserName" class="text-danger"></span>
             </div>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group" id="title" style="margin-top:20px;">
-                <label asp-for="Title" class="control-label"></label>
-                <input asp-for="Title" class="form-control title" />
-                @*<span asp-validation-for="Title" class="text-danger"></span>*@
+            <div class="form-group" id="titlediv" style="margin-top:20px;">
+              @*  <label asp-for="제목" class="control-label"></label>*@
+            <input asp-for="Title" id="title" class="form-control title" placeholder="제목" />
+                <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             
+            
             <div class="content" style="margin-top:20px;">
-                <label asp-for="Content" class="control-label"></label>
-
+               
+              @*  <label asp-for="Content" class="control-label"></label>*@
                 <textarea asp-for="Content" id="editor" name="Content" class="form-control"></textarea>
+               
+
                @* <label asp-for="Content" class="control-label"></label>
                 <textarea asp-for="Content" class=" form-control"></textarea>
-<<<<<<< HEAD
                 asp-for="Content"
                 <span asp-validation-for="Content" class="text-danger"></span>*@
-                <input type="file" name="files" class="ckeditor-file-upload">
-=======
->>>>>>> 689750d4ae2f5ae9cbfd349ac34140be4c3734d3
+               
             </div>
             @*<div class="upload-container">
                 <input type="file" name="files" id="file" multiple />
             </div>*@
-           
 
             <div class="form-group" style="margin-bottom:20px;">
-                <input type="submit" value="게시글 작성" class="btn btn-secondary" @*onclick="fnSendFile()"*@ onclick="getContent()" />
+                <input type="button" value="게시글 작성" class="btn btn-secondary" id="actionCreate" @*onclick="fnSendFile()"*@ />
             </div>
-        </form>
+        @*</form>*@
     </div>
     </div>
 
@@ -137,86 +135,103 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-<<<<<<< HEAD
-        //ClassicEditor
-        //    .create(document.querySelector('#editor'),{
-
-               
-        //    })
-        //    .catch(error => {
-        //        console.error(error);
-        //    });
 
         //ClassicEditor
         //    .create(document.querySelector('#editor'))
         //    .catch(error => {
         //        console.error(error);
         //    });
-=======
->>>>>>> 689750d4ae2f5ae9cbfd349ac34140be4c3734d3
+
+        //이미지를 미리 보여주기 위해 만든 코드.
+        class UploadAdapter {
+            constructor(loader, url) {
+                this.loader = loader;
+                this.url = url;
+            }
+
+            upload() {
+                return this.loader.file.then(file => new Promise((resolve, reject) => {
+                    let formData = new FormData();
+                    formData.append('file', file);
+                    fetch(this.url, {
+                        method: 'POST',
+                        body: formData,
+                    })
+                        .then(response => {
+                                response.json().then(data => {
+                                    const url = new URL(data.imageUrl, window.location.origin); // URL 생성
+                                    const absoluteUrl = url.href // 절대 경로 추출
+                                    resolve({
+                                        default: absoluteUrl
+                                    });
+                                });
+                           
+                        })
+                        .catch(error => {
+                            reject('파일 업로드 중 오류가 발생했습니다.');
+                        });
+                }));
+            }
+
+            abort() {
+                // 업로드가 취소되는 경우에 수행할 작업을 여기에 작성합니다.
+            }
+        }
+
 
         ClassicEditor
-            .create(document.querySelector('#editor'), {
-                //toolbar: [... ], // 에디터 툴바 옵션들
-                image: {
-                    // 이미지 업로드 설정
-                    toolbar: ['imageTextAlternative', '|', 'imageStyle:alignLeft', 'imageStyle:full', 'imageStyle:alignRight'],
-                    styles: [
-                        'full',
-                        'alignLeft',
-                        'alignRight'
-                    ]
-                },
-                simpleUpload: {
-                    // 이미지 업로드 URL
-                    uploadUrl: 'https://localhost:7295/Notices/Create/'
-                }
+            .create(document.querySelector('#editor'))
+            .then(editor => {
+                editor.model.document.on('change', () => {
+                    var htmlContent = editor.getData();
+                    console.log(htmlContent);
+                    document.getElementById("editor").value = htmlContent;
+                });
+
+                editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+                    return new UploadAdapter(loader, 'https://localhost:7295/Notices/Upload');
+                };
             })
             .catch(error => {
                 console.error(error);
+            });
 
-
-        function fnSendFile() {
-
-            let formData = new FormData();
-            let files = $('input=[name=files]')[0].files;
-            for (i = 0; i < files.length; i++) {
-                formData.append('files', files[i])
-            }
+        document.querySelector('#actionCreate').addEventListener('click', () => {
+            let content = document.getElementById('editor').value;
+            //document.getElementById('editor').value = editorData;
+            
+            let title = document.getElementById('title').value;
+            let username = document.getElementById('username').value;
+            let select = document.getElementById('category');
+            let selectValue = select.value;
+           
+            console.log(content, title, username, selectValue)
 
             $.ajax({
                 url: '/Notices/Create',
-                data: formData,
+                data: {
+                "content": content,
+                "title":title,
+                "username":username,
+                "category":selectValue,
+                },
                 type: "POST",
-                contentType: false,
-                processData: false,
-                async: false,
                 success: function (data) {
+                    console.log(data.result)
                     if (data.result == 0) {
-                                 파일 업로드 후 리스트 초기화
-                        alert("파일 업로드 완료!");
-                                 컨트롤러 메인 페이지로 이동
-                        window.location.href = "/Home";
+                        window.location.href = "https://localhost:7295/Notices/Index";
                     }
                     else {
-                        alert("파일 업로드 실패!");
+                        alert("실패");
                     }
                 },
                 error: function (err) {
-                             에러일 경우 에러 메세지 출력
+                                   
                     alert(err.statusText);
                 }
 
             });
-
-       
-        function getContent(){
-            alert('글작성 함수');
-            var editorData = editor.getData();
-            $('#editor').val(editorData);
-        }
-
-
+        });
     </script>
 }
 

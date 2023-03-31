@@ -62,17 +62,64 @@
                     console.log("error: " + error);
                 }
                 });
-            }
+            }//comment edit
+
+
+        function MovePage(id, which) {
+            $.ajax({
+                url: 'https://localhost:7295/Notices/MovePage',
+                type: "GET",
+                data: {
+                    "targetId": id,
+                    "condition": which
+                },
+                success: function (data) {
+                    console.log(data)
+                    if(data.success == true){
+                        var Noticeid = data.data.id
+                        window.location.href = "https://localhost:7295/Notices/Details/" + Noticeid;
+                    }else{
+                        alert('해당글이 없습니다.')
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
+                }//error
+
+            }); //ajax
+        }
+
     </script>
 }
 
-@*게시글 보는 곳*@
-<div class="whole-wrap" style="margin:30px;">
+<style>
+    .moveBtn{
+        background-color: #EBFBFF;
+        border:none;
+        width:80px;
+        height:40px;
+        border-radius:20px;
+        border:solid 1px gray;
+        margin-left:15px;
+    }
+</style>
 
-    <div class="titleSection" style="margin-bottom:20px;">
-        @Html.DisplayFor(@Model => @Model.Category)
-        <h4> @Html.DisplayFor(@Model => @Model.Title) </h4>
+@*게시글 보는 곳*@
+
+<div class="whole-wrap" style="margin:30px;">
+    <div style="display:flex; justify-content:space-between">
+        <div class="titleSection" style="margin-bottom:20px;">
+            <h3> @Html.DisplayFor(@Model => @Model.Category)</h3>
+            <h4> @Html.DisplayFor(@Model => @Model.Title) </h4>
+        </div>
+        <div>
+            <input type="button" class="moveBtn" value="이전글" onclick="MovePage('@Model.Id',0)" />
+            <input type="button" class="moveBtn" value="다음글" onclick="MovePage('@Model.Id',1)" />
+        </div>
+        
     </div>
+    
 
     <div style="background-color:#F4FFFF; padding-left:20px; padding-right:20px; display:flex; justify-content:space-between;">
         <div>

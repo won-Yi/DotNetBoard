@@ -12,6 +12,7 @@ namespace Board.Models
 
         public string FileNames { get; set; }
         public string FilePath { get; set; }
+
     }
 }
 

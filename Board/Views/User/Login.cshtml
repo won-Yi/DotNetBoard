@@ -5,25 +5,25 @@
 }
 
 
-
-<div class="wrap" style="width:400px; margin:auto;margin-top:20%;">
-    <div>Login</div>
-    <br />
-    <div class="input-group mb-3">
-        <span class="input-group-text" id="inputGroup-sizing-default">Email</span>
-        <input type="text" id="email"
-               class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+<div style="height:600px;">
+    <div class="wrap" style="width:400px; margin:auto;margin-top:20%;">
+        <div>Login</div>
+        <br />
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Email</span>
+            <input type="text" id="email"
+                   class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default">
+        </div>
+        <div class="input-group mb-3">
+            <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
+            <input type="password" id="password" onkeyup='passwordCheck()'
+                   class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
+        </div>
+        <div style="text-align:center; margin-top:30px;">
+            <input type="button" class="btn btn-warning" value="Login" onclick="loginSubmit()" />
+        </div>
     </div>
-    <div class="input-group mb-3">
-        <span class="input-group-text" id="inputGroup-sizing-default">Password</span>
-        <input type="password" id="password" onkeyup='passwordCheck()'
-               class="form-control" aria-label="Sizing example input" aria-describedby="inputGroup-sizing-default" />
-    </div>
-    
-    <input type="button" value="로그인" onclick="loginSubmit()" />
-    
 </div>
-
 @section Scripts{
    <script>
         function loginSubmit() {
