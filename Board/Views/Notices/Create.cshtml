@@ -101,7 +101,6 @@
                 <span asp-validation-for="Title" class="text-danger"></span>
             </div>
             
-            
             <div class="content" style="margin-top:20px;">
                
               @*  <label asp-for="Content" class="control-label"></label>*@
@@ -134,13 +133,6 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
     <script>
-
-        //ClassicEditor
-        //    .create(document.querySelector('#editor'))
-        //    .catch(error => {
-        //        console.error(error);
-        //    });
-
         //이미지를 미리 보여주기 위해 만든 코드.
         class UploadAdapter {
             constructor(loader, url) {
