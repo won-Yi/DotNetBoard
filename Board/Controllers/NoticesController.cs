@@ -156,8 +156,6 @@ namespace Board.Controllers
                 usernickname = "알수없음";
             }
 
-
-
             var NoticeDto = new NoticeDto
             {
                 Categorys = noticeCategory.Categorys,
@@ -169,11 +167,6 @@ namespace Board.Controllers
             return View(NoticeDto);
         }
 
-        //다음글 이전글 가져오기
-        //var notice = from m in _context.Notice select m;
-        //List<Notice> noticeList = notice.ToList();
-        //만약 다음글이라고 누른다면 moveDetailPage함수에서 현재 글의 Id와 그 위치를 찾고
-        //다음글이나 이전글의 ID를 찾아내서 그걸 Detail인자로 주고 화면을 넘겨주면 된다..?입니다.
         public async Task<IActionResult> MovePage(int targetId, int condition)
         {
             //condition이 0이면 이전글, 1이면 다음글
@@ -346,7 +339,7 @@ namespace Board.Controllers
             [FromForm] string content,
             [FromForm] string username,
             [FromForm] string category,
-            [FromForm] List<IFormFile> files)
+            [FromForm] List<IFormFile>? files)
         {
 
             int result = -1;
@@ -365,8 +358,6 @@ namespace Board.Controllers
                 await _context.SaveChangesAsync();
                 //return Json(new { result = 0 });
             }
-
-
             string uploadDir = "D:/code/Board/UploadPath/";
             try
             {
@@ -428,7 +419,6 @@ namespace Board.Controllers
             var uploadPath = Path.Combine(hostEnv.WebRootPath, "Files");
             var filePath = Path.Combine(uploadPath, fileName);
 
-
             using (var stream = new FileStream(filePath, FileMode.CreateNew))
             {
                 await file.CopyToAsync(stream);
@@ -436,8 +426,7 @@ namespace Board.Controllers
             return Ok(new { imageUrl = $"/Files/{fileName}" });
         }
 
-        
-
+ 
         // GET: Notices/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {

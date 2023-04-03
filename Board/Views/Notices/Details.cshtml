@@ -107,7 +107,7 @@
 
 @*게시글 보는 곳*@
 
-<div class="whole-wrap" style="margin:30px;">
+<div class="whole-wrap" style="margin:30px;>
     <div style="display:flex; justify-content:space-between">
         <div class="titleSection" style="margin-bottom:20px;">
             <h3> @Html.DisplayFor(@Model => @Model.Category)</h3>
@@ -239,12 +239,12 @@
                     이름:  <input type="text" name="username" /> <br />
                 </div>
                 <div style="display:flex; margin-bottom:20px;">
-                    <textarea rows="4" cols="90" name="comment"></textarea><br />
+                    <input name="comment" style="width:800px; margin-right:10px;"></input><br />
                     <input type="hidden" asp-for="Id" />
                     <button type="submit" class="btn btn-secondary btn-lg">댓글등록</button>
                 </div>
             </form>
-
             <a asp-action="Index">Back to List</a>
         </div>
     </div>
+
