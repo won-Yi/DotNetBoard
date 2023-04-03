@@ -16,7 +16,7 @@ using FluentAssertions;
 namespace BoardTests.LoginTests
 {
     public class LoginTests
-    {
+    {   //test
         [Theory]
         [InlineData("email@naver.com", "7009900")]
         //[InlineData("email2@naver.com", "1234")]
