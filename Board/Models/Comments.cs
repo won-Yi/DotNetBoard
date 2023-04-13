@@ -5,6 +5,7 @@ namespace Board.Models
 {
     public class Comments
     {
+        [Key]
         public int Id { get; set; }
 
         public int Notice_id { get; set; }

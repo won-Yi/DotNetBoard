@@ -11,12 +11,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FluentAssertions;
 
 namespace BoardTests.LoginTests
 
 {
     using Board.Models;
+    using Newtonsoft.Json.Linq;
+    using FluentAssertions;
+
     public class JoinTests
     {
         [Theory]
@@ -72,7 +74,8 @@ namespace BoardTests.LoginTests
             var result2 = await controller.Join("test@test.com", "1234", "test");
             result2.Should().BeOfType<OkResult>();
 
-        }
+        }//emial이 이미 존재하는지
+
     }
 
 }
