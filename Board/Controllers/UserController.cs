@@ -103,17 +103,20 @@ namespace Board.Views.User
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string email, string password)
         {
-            if (ModelState.IsValid) { 
-                
+            
+            if (ModelState.IsValid) {
+               
                 Notice notice = new Notice();
                 var user = _context.User.FirstOrDefault(x => x.Email == email);
-
+                
                 if (user != null) {
                     //password 비교하고 맞으면 게시판 페이지로 넘어간다.
                     //비밀번호 해쉬부분
                     string[] parts = user.HashPassword.Split('|');
                     string savedHashedPassword = parts[0];
-                    string savedSalt = parts[1];
+                    string savedSalt="";
+                    savedSalt = parts[1];
+                    //string savedSalt = parts[1];
 
                     byte[] saltBytes = Convert.FromBase64String(savedSalt);
                     string hashedPassword = HashPasswordWithSalt(Encoding.UTF8.GetBytes(password), saltBytes);

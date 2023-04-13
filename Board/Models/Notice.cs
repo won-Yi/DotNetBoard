@@ -6,6 +6,7 @@ namespace Board.Models
 {
     public class Notice
     {
+        [Key]
         public int Id { get; set; }
         public int Views_Number { get; set; }
         public string Title { get; set; }

@@ -1,43 +1,21 @@
-﻿using System;
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text.Encodings.Web;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Board.Data;
-using Board.Models;
 using System.Diagnostics;
-using Microsoft.Data.SqlClient;
-using System.Xml.Linq;
-using Azure.Identity;
-using Board.Migrations;
-using static System.Formats.Asn1.AsnWriter;
-using Microsoft.Identity.Client;
-using System.Reflection;
-using Microsoft.CodeAnalysis.VisualBasic.Syntax;
-using System.ComponentModel.DataAnnotations;
-using Microsoft.IdentityModel.Tokens;
-using static Dropbox.Api.Files.ListRevisionsMode;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Board.Controllers
 {
 
     using Board.Models;
-    using Microsoft.EntityFrameworkCore.Metadata.Internal;
-    using System.IO.Pipes;
-    using System.Net;
-    using System.Reflection.PortableExecutable;
+    using Board.Interfaces;
     using System.IO;
-    using Microsoft.Build.Evaluation;
+    using Board.Infrastructure;
 
+   
     public class NoticeDto
     {
+        
         public int Id { get; set; }
 
         public int Views_Number { get; set; }
@@ -73,20 +51,20 @@ namespace Board.Controllers
         //user의 id
         public int UserId { get; set; }
         public string UserNickName { get; set; }
-
-
     }
-
 
     public class NoticesController : Controller
     {
 
         //context 
-        private readonly BoardContext _context;
+        public CreateSessionRepository _create_context;
+        public  BoardContext _context;
         private IWebHostEnvironment hostEnv;
 
-        public NoticesController(BoardContext context, IWebHostEnvironment env)
+        public NoticesController(CreateSessionRepository create_context, IWebHostEnvironment env, BoardContext context)
         {
+
+            _create_context = create_context;
             _context = context;
             hostEnv = env;
         }
@@ -94,6 +72,7 @@ namespace Board.Controllers
 
         // GET: Notices
         [ActionName("Index")]
+        [HttpGet]
         public async Task<IActionResult> Index(string? Category, string? searchString, int id)
         {
 
@@ -341,7 +320,7 @@ namespace Board.Controllers
             [FromForm] string category,
             [FromForm] List<IFormFile>? files)
         {
-
+            //_create_context
             int result = -1;
             Notice notice = new Notice();
 
@@ -354,8 +333,8 @@ namespace Board.Controllers
                 notice.UserName = username;
                 notice.Category = category;
 
-                _context.Add(notice);
-                await _context.SaveChangesAsync();
+                await _create_context.AddAsync(notice);
+                //await _context.SaveChangesAsync();
                 //return Json(new { result = 0 });
             }
             string uploadDir = "D:/code/Board/UploadPath/";
@@ -450,72 +429,14 @@ namespace Board.Controllers
         public async Task<IActionResult> Edit(int id, string title, string content, string username, string category)
         {
 
-            Notice notice = new Notice();
-            var notices = _context.Notice.FirstOrDefault(m => m.Id == id);
+            Notice noitce = new Notice();
             //int result = -1;
-            if (id != notices.Id)
-            {
-                return NotFound();
-            }
-
-            //var fileModels = _context.FileModel.Where(x => x.NoticeId == notice.Id).ToList();
-            //if (files != null && files.Count > 0)
-            //{
-            //    _context.FileModel.RemoveRange(fileModels);
-            //    await _context.SaveChangesAsync();
-            //    result = 1;
-            //}
-
-            //string uploadDir = "D:/code/Board/UploadPath/";
-            //try
-            //{
-            //    // 업로드 폴더 경로 존재 확인
-            //    DirectoryInfo di = new DirectoryInfo(uploadDir);
-            //    // 폴더가 없을 경우 신규 작성
-            //    if (di.Exists == false) di.Create();
-
-            //    // 선택한 파일 개수만큼 반복
-            //    foreach (var formFile in files)
-            //    {
-            //        if (formFile.Length > 0)
-            //        {
-            //            var fileFullPath = uploadDir + formFile.FileName;
-
-            //            // 파일명이 이미 존재하는 경우 파일명 변경
-            //            int filecnt = 1;
-            //            System.String newFilename = string.Empty;
-            //            while (new FileInfo(fileFullPath).Exists)
-            //            {
-            //                var idx = formFile.FileName.LastIndexOf('.');
-            //                var tmp = formFile.FileName.Substring(0, idx);
-            //                newFilename = tmp + System.String.Format("({0})", filecnt++) + formFile.FileName.Substring(idx);
-            //                fileFullPath = uploadDir + newFilename;
-            //            }
-
-            //            FileModel model = new FileModel();
-
-            //            model.NoticeId = notice.Id;
-            //            model.FilePath = fileFullPath;
-            //            model.FileNames = formFile.FileName;
-            //            _context.Add(model);
-            //            await _context.SaveChangesAsync();
-
-
-            //            // 파일 업로드
-            //            using (var stream = new FileStream(fileFullPath, FileMode.CreateNew))
-            //            {
-            //                await formFile.CopyToAsync(stream);
-            //            }
-            //        }
-            //    }
-            //    result = 0;
-            //}
-            //catch (Exception)
-            //{
-            //    throw;
-            //}
+            //var notices = _context.Notice.FirstOrDefault(s => s.Id == id);
+            var notices = await _create_context.GetByIdAsync(id);
             if (ModelState.IsValid)
             {
+                //var notices = await _create_context.GetByIdAsync(id);
+                    
                     DateTime time_now = DateTime.Now;
                     notices.UpdateDate = time_now;
                     notices.Title = title;
@@ -523,11 +444,11 @@ namespace Board.Controllers
                     notices.UserName = username;
                     notices.Category = category;
 
-                _context.Update(notices);
-                    await _context.SaveChangesAsync();
+                   await _create_context.UpdateAsync(notices);
+                  //await _context.SaveChangesAsync();
                 return Json(new { result = 0 });
             }
-            return View(notice);
+            return View(noitce);
         }
 
         // POST: Notices/Delete/5
@@ -664,6 +585,11 @@ namespace Board.Controllers
         private bool NoticeExists(int id)
         {
             return (_context.Notice?.Any(e => e.Id == id)).GetValueOrDefault();
+        }
+
+        public Task Index(int num_id)
+        {
+            throw new NotImplementedException();
         }
     }
 }

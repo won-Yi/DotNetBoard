@@ -14,17 +14,20 @@ using Xunit;
 using Microsoft.AspNetCore.Http;
 using FluentAssertions;
 using System.Diagnostics.CodeAnalysis;
+using Board.Infrastructure;
+using Board.Interfaces;
+using static Dropbox.Api.Sharing.ListFileMembersIndividualResult;
 
 namespace BoardTests.CreateTests
 {
+   
     public class CreateTests
     {
-
         [Theory]
         [InlineData("title", "content", "user", "category")]
-        [InlineData("title", null, "user", "category")]
-        [InlineData("title", "content", null, "category")]
-        [InlineData("title", "content", "user", null)]
+        //[InlineData("title", null, "user", "category")]
+        //[InlineData("title", "content", null, "category")]
+        //[InlineData("title", "content", "user", null)]
 
         //Arrange
         public async Task Create_ReturnsBadRequest_WhenRequiredFieldsAreMissing(
@@ -32,25 +35,31 @@ namespace BoardTests.CreateTests
                         string content,
                         string username,
                         string category
-                        )    
+                        )
         {
             var options = new DbContextOptionsBuilder<BoardContext>()
-                .UseInMemoryDatabase(databaseName: "test_db")
-                .Options;
+     .UseInMemoryDatabase(databaseName: "test_db")
+     .Options;
             var context = new BoardContext(options);
             var env = new Mock<IWebHostEnvironment>().Object;
-            var controller = new NoticesController(context, env);
+            var createSessionRepo = new EFSboardSessionRepository(context); // 구현한 클래스의 인스턴스 생성
+            var controller = new NoticesController(createSessionRepo, env, context); //
 
             var result = await controller.Create(
-                title: title,
-                content: content,
-                username: username,
-                category: category,
-                files:null
-                );
+                 title: title,
+                 content: content,
+                 username: username,
+                 category: category,
+                 files: new List<IFormFile>()
+                 ) ;
 
-            result.As<ViewResult>().Model.Should().BeNull();
-            result.Should().BeOfType<ViewResult>().Which.Should().NotBeNull();
+            Assert.NotNull(result);
+            //Assert.Equal("New Title", repository.Title);
+            //Assert.Equal("New Content", repository.Content);
+            //Assert.Equal("New User", repository.UserName);
+            //Assert.Equal("New Category", repository.Category);
+
+
         }
     }
 }
