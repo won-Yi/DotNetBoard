@@ -12,7 +12,7 @@ namespace BoardTest.BoardTests
     {
 
         [Theory]
-        [InlineData(56, "title", "content", "user", "category")]
+        [InlineData(51, "title", "content", "user", "category")]
         //[InlineData(2,"title", null, "user", "category")]
         //[InlineData(3,"title", "content", null, "category")]
         //[InlineData(4,"title", "content", "user", null)]
@@ -31,8 +31,9 @@ namespace BoardTest.BoardTests
             var context = new BoardContext(options);
             var env = new Mock<IWebHostEnvironment>().Object;
             var _context = new EFSboardSessionRepository(context);
-            var controller = new NoticesController(_context, env, context);
-
+            var create_context = new EFSCommentSessionRepository(context);
+            var controller = new NoticesController(_context, create_context, env, context);
+            
             var result = await controller.Edit(id, title, content, username, category);
 
 
@@ -49,17 +50,17 @@ namespace BoardTest.BoardTests
             var context = new BoardContext(options);
             var env = new Mock<IWebHostEnvironment>().Object;
             var _context = new EFSboardSessionRepository(context);
-            var controller = new NoticesController(_context, env, context);
+            var create_context = new EFSCommentSessionRepository(context);
+            var controller = new NoticesController(_context, create_context, env, context);
 
             var notices = new Notice
             {
-                Id = 54,
+                Id = 51,
                 Title = "Initial Title",
                 Content = "Initial Content",
                 UserName = "Initial User",
                 Category = "Initial Category"
             };
-
 
             var result = await controller.Edit(
                id: notices.Id,

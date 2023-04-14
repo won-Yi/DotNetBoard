@@ -15,6 +15,13 @@ namespace Board.Data
         {
         }
 
+        public static DbContextOptions<BoardContext> Setting()
+        {
+            return new DbContextOptionsBuilder<BoardContext>()
+                .UseSqlServer("Data Source =.\\SQLEXPRESS; Initial Catalog = board; Persist Security Info = True; User ID = sa; Password = 123qwe!@#QWE;Trusted_Connection=True;MultipleActiveResultSets=true;Trust Server Certificate=true")
+                .Options;
+        }
+
         public DbSet<Board.Models.Notice> Notice { get; set; } 
         public DbSet<Board.Models.Comments> Comments { get; set; }
         public DbSet<Board.Models.User> User { get; set; }

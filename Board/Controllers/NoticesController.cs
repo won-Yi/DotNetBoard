@@ -58,13 +58,15 @@ namespace Board.Controllers
 
         //context 
         public CreateSessionRepository _create_context;
+        private readonly CommentCreateSessionRepository _comment_create_context;
         public  BoardContext _context;
         private IWebHostEnvironment hostEnv;
 
-        public NoticesController(CreateSessionRepository create_context, IWebHostEnvironment env, BoardContext context)
+        public NoticesController(CreateSessionRepository create_context, CommentCreateSessionRepository commentCreateSessionRepository, IWebHostEnvironment env, BoardContext context)
         {
 
             _create_context = create_context;
+            _comment_create_context = commentCreateSessionRepository;
             _context = context;
             hostEnv = env;
         }
@@ -510,11 +512,11 @@ namespace Board.Controllers
                 //현재 시간을 데이터 베이스에 넣어준다.
                 DateTime time_now = DateTime.Now;
                 comments.UpdateTime = time_now;
-                Debug.WriteLine(comments);
 
-                _context.Add(comments);
-                await _context.SaveChangesAsync();
-                Response.Redirect("Details/" + id);
+
+                _comment_create_context.AddAsync(comments);
+                //Response.Redirect("Details/" + id);
+                return RedirectToAction("Details", new { id = id }); // RedirectToAction를 사용하여 리다이렉션 처리
             }
 
             return View();
@@ -523,7 +525,7 @@ namespace Board.Controllers
         [HttpPost]
         public async Task<IActionResult> CommentEdit(int Id, string UserName, string editComment)
         {
-            var comment = _context.Comments.FirstOrDefault(c => c.Id == Id);
+            var comment = await _comment_create_context.GetByIdAsync(Id);
 
             comment.UserName = (string)UserName;
             comment.Comment = editComment;
@@ -536,8 +538,7 @@ namespace Board.Controllers
                     DateTime time_now = DateTime.Now;
                     comment.UpdateTime = time_now;
 
-                    _context.Update(comment);
-                    await _context.SaveChangesAsync();
+                    _comment_create_context.UpdateAsync(comment);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
