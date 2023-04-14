@@ -37,6 +37,9 @@ namespace Board
 
             services.AddScoped<CreateSessionRepository,
                 EFSboardSessionRepository>();
+
+            services.AddScoped<CommentCreateSessionRepository,
+                EFSCommentSessionRepository>();
         }
 
 

@@ -28,7 +28,8 @@ namespace BoardTest.BoardTests
             var context = new BoardContext(options);
             var env = new Mock<IWebHostEnvironment>().Object;
             var _context = new EFSboardSessionRepository(context);
-            var controller = new NoticesController(_context, env, context);
+            var create_context = new EFSCommentSessionRepository(context);
+            var controller = new NoticesController(_context, create_context, env, context);
 
             // Act
 
